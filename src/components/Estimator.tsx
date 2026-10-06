@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { AnimatedNumber } from './AnimatedNumber';
+import { Reveal } from './Reveal';
 import { DOLLARS_PER_OFFER, MINUTES_PER_OFFER } from '../lib/config';
 
 const equivalency = (n: number) => {
@@ -24,14 +27,19 @@ export function Estimator() {
 
   return (
     <section id="estimator" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
+      <Reveal>
       <h2 className="text-3xl font-extrabold tracking-tight">The Time Sacrifice Estimator</h2>
       <p className="mt-2 text-muted max-w-xl">
         Declare how many surveys you are prepared to suffer. Observe your return remain rigidly at zero while Zak ascends the economic ladder. (One rung.)
       </p>
+      </Reveal>
+      <Reveal delay={0.1}>
 
       <div className="mt-8 flex items-baseline justify-between gap-4">
         <label htmlFor="n" className="font-mono text-sm text-muted">Surveys I intend to suffer</label>
-        <span className="font-mono text-4xl text-accent tabular-nums">{n}</span>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span key={n} initial={{ y: -14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 14, opacity: 0 }} transition={{ duration: 0.15 }} className="font-mono text-4xl text-accent tabular-nums">{n}</motion.span>
+        </AnimatePresence>
       </div>
       <input
         id="n"
@@ -48,19 +56,29 @@ export function Estimator() {
 
       <div className="mt-8 grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-line border-y border-line">
         <Stat label="Your guaranteed yield" value="$0.00" note="Cash-back rate: strictly 0.00%." />
-        <Stat label="Mortal span forfeited" value={`~${Math.round(n * MINUTES_PER_OFFER)} min`} note="Non-refundable. Entropy doesn’t do returns." />
-        <Stat label="Bounty gifted to Zak" value={`$${(n * DOLLARS_PER_OFFER).toFixed(2)}`} note="He will not be able to look you in the eye." accent />
+        <Stat label="Mortal span forfeited" value={<>~<AnimatedNumber value={n * MINUTES_PER_OFFER} format={v => String(Math.round(v))} /> min</>} note="Non-refundable. Entropy doesn’t do returns." />
+        <Stat label="Bounty gifted to Zak" value={<AnimatedNumber value={n * DOLLARS_PER_OFFER} format={v => `$${v.toFixed(2)}`} />} note="He will not be able to look you in the eye." accent />
       </div>
 
-      <p className="mt-6 text-lg">
-        <span className="font-mono text-xs text-muted uppercase tracking-widest mr-3">{rank(n)}</span>
-        {equivalency(n)}
-      </p>
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={equivalency(n)}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          className="mt-6 text-lg min-h-14"
+        >
+          <span className="font-mono text-xs text-muted uppercase tracking-widest mr-3">{rank(n)}</span>
+          {equivalency(n)}
+        </motion.p>
+      </AnimatePresence>
+      </Reveal>
     </section>
   );
 }
 
-function Stat({ label, value, note, accent }: { label: string; value: string; note: string; accent?: boolean }) {
+function Stat({ label, value, note, accent }: { label: string; value: React.ReactNode; note: string; accent?: boolean }) {
   return (
     <div className="py-5 sm:px-6 first:sm:pl-0 last:sm:pr-0">
       <p className="font-mono text-xs text-muted uppercase tracking-wider">{label}</p>

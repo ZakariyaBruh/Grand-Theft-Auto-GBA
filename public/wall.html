@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offers</title>
+<style>
+  html, body { height: 100%; margin: 0; background: #0a0a0c; color: #ecece6; font-family: system-ui, sans-serif; }
+  #bar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; text-align: center; padding: 24px; }
+  button { font: inherit; font-weight: 600; color: #ecece6; background: transparent; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 12px 28px; cursor: pointer; }
+  button:hover { background: #e8ff47; color: #000; border-color: #e8ff47; }
+  #note { color: #8c8c85; font-size: 14px; max-width: 28em; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <button id="open" type="button">Open the offers</button>
+  <p id="note">Loading offers…</p>
+</div>
+<script>
+  // Offer script is loaded synchronously: it uses document.write, which fails for async-injected scripts.
+  var uid = new URLSearchParams(location.search).get('uid') || '';
+  var valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uid);
+  var src = 'https://ridefiles.net/script_include.php?id=1917436' + (valid ? '&tracking_id=' + encodeURIComponent(uid) : '');
+  document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+</script>
+<script>
+  var note = document.getElementById('note');
+  function openOffers() {
+    if (typeof window.call_locker === 'function') { window.call_locker(); note.textContent = 'Offers are open. Pick one.'; }
+    else note.textContent = 'The offers haven’t loaded yet. Give it a few seconds and press the button again.';
+  }
+  document.getElementById('open').addEventListener('click', openOffers);
+  window.addEventListener('load', function () { setTimeout(openOffers, 600); });
+</script>
+</body>
+</html>

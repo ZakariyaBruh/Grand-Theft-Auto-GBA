@@ -1,3 +1,5 @@
+import { Reveal } from './Reveal';
+
 const items: [string, string][] = [
   ['What do I get?', 'Nothing. Absolutely zero. Nada. You spend roughly 3 to 5 minutes answering arbitrary questions about auto insurance or shampoo preference, and Zak receives roughly $1.42. It is the purest form of economic altruism ever devised by human civilisation. (You also get Void Points. See above. Don’t get excited.)'],
   ['Is this a scam?', 'How could it be a scam when we are 100% transparent that you receive no goods, services, cryptocurrency, equity or emotional closure? Scams make false promises of wealth. We guarantee genuine, unadulterated emptiness.'],
@@ -13,19 +15,19 @@ const items: [string, string][] = [
 export function Faq() {
   return (
     <section id="faq" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
-      <h2 className="text-3xl font-extrabold tracking-tight">Frequently Avoided Questions</h2>
+      <Reveal><h2 className="text-3xl font-extrabold tracking-tight">Frequently Avoided Questions</h2>
       <p className="mt-2 text-muted max-w-xl">
         Most landing pages bury their motives under legal disclaimers. We prefer candour in high definition. No clicking required.
-      </p>
+      </p></Reveal>
       <dl className="mt-10 grid md:grid-cols-2 gap-x-14 gap-y-9">
         {items.map(([q, a], i) => (
-          <div key={q} className="grid grid-cols-[2rem_1fr]">
+          <Reveal key={q} delay={(i % 2) * 0.08} className="grid grid-cols-[2rem_1fr]">
             <span className="font-mono text-sm text-accent pt-1">{String(i + 1).padStart(2, '0')}</span>
             <div>
               <dt className="font-semibold text-lg leading-snug">{q}</dt>
               <dd className="mt-1.5 text-ink/70">{a}</dd>
             </div>
-          </div>
+          </Reveal>
         ))}
       </dl>
     </section>

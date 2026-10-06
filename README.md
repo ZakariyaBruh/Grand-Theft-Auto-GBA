@@ -2,7 +2,7 @@
 
 A black liquid-glass portal around a CPAGrip offer wall. You do an offer, Zak gets paid, you get Void Points (worth what they sound like) and a few small perks.
 
-Points are **verified server-side**: the browser generates a random ID, passes it to the offer wall as `tracking_id`, and CPAGrip's postback tells `/api/postback` when an offer really completed. The browser can only read its balance, never write it.
+Points are **verified server-side**: the browser generates a random ID, passes it to the CPAGrip offer script (via `public/wall.html`) as `tracking_id`, and CPAGrip's postback tells `/api/postback` when an offer really completed. The browser can only read its balance, never write it.
 
 ## Deploy on Vercel
 
@@ -15,7 +15,7 @@ Points are **verified server-side**: the browser generates a random ID, passes i
    https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={tracking_id}&txid={...}
    ```
 
-   Replace each `{macro}` with the macro CPAGrip shows for your account (user/tracking id, and a unique conversion id for `txid`). If your param names differ, set `POSTBACK_UID_PARAM` / `POSTBACK_TXID_PARAM`. If the offer wall uses a different query param than `tracking_id` for the user id, change `TRACKING_PARAM` in `src/lib/config.ts`.
+   Replace each `{macro}` with the macro CPAGrip shows for your account (user/tracking id, and a unique conversion id for `txid`). If your param names differ, set `POSTBACK_UID_PARAM` / `POSTBACK_TXID_PARAM`.
 
 Each `txid` is credited once, so postback retries don't double-count.
 

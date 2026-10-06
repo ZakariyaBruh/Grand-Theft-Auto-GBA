@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Printer } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { Reveal } from './Reveal';
 
 interface Perk {
   id: string;
@@ -28,24 +30,24 @@ export function Perks({ points }: { points: number }) {
 
   return (
     <section id="perks" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
-      <h2 className="text-3xl font-extrabold tracking-tight">The Void Point Redemption Programme</h2>
+      <Reveal><h2 className="text-3xl font-extrabold tracking-tight">The Void Point Redemption Programme</h2>
       <p className="mt-2 text-muted max-w-xl">
         Void Points hold no monetary value and cannot be spent anywhere. They do, however, unlock these three things.
         {next ? ` ${(next.cost - points).toLocaleString()} more for the next one.` : ' You have all of them. Go outside.'}
-      </p>
+      </p></Reveal>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">
-        {PERKS.map(perk => {
+        {PERKS.map((perk, i) => {
           const open = points >= perk.cost;
           return (
-            <li key={perk.id} className="py-6 grid sm:grid-cols-[6rem_1fr] gap-x-6 gap-y-3">
+            <Reveal as="li" delay={i * 0.1} key={perk.id} className="py-6 grid sm:grid-cols-[6rem_1fr] gap-x-6 gap-y-3">
               <span className={`font-mono text-3xl ${open ? 'text-accent' : 'text-muted'}`}>{perk.cost}</span>
               <div>
                 <h3 className={`text-xl font-semibold ${open ? '' : 'text-ink/60'}`}>{perk.title}</h3>
                 <p className="text-muted">{open ? perk.blurb : `${perk.blurb} (${perk.cost - points} points away)`}</p>
-                {open && <div className="mt-5 max-w-md">{perk.id === 'checklist' ? <Checklist /> : perk.id === 'timer' ? <Timer /> : <Cert />}</div>}
+                <AnimatePresence>{open && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-5 max-w-md overflow-hidden">{perk.id === 'checklist' ? <Checklist /> : perk.id === 'timer' ? <Timer /> : <Cert />}</motion.div>}</AnimatePresence>
               </div>
-            </li>
+            </Reveal>
           );
         })}
       </ul>

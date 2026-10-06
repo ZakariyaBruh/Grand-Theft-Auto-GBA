@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { OfferWall } from './components/OfferWall';
@@ -11,7 +12,7 @@ export default function App() {
   const tally = useTally();
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <Header points={tally.points} />
       <main>
         <Hero tally={tally} />
@@ -21,6 +22,6 @@ export default function App() {
         <Faq />
       </main>
       <Footer />
-    </>
+    </MotionConfig>
   );
 }
