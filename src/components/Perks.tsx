@@ -28,9 +28,9 @@ export function Perks({ points }: { points: number }) {
 
   return (
     <section id="perks" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
-      <h2 className="text-3xl font-extrabold tracking-tight">What your points unlock</h2>
+      <h2 className="text-3xl font-extrabold tracking-tight">The Void Point Redemption Programme</h2>
       <p className="mt-2 text-muted max-w-xl">
-        Void Points can’t be spent anywhere. These are the three things they do.
+        Void Points hold no monetary value and cannot be spent anywhere. They do, however, unlock these three things.
         {next ? ` ${(next.cost - points).toLocaleString()} more for the next one.` : ' You have all of them. Go outside.'}
       </p>
 

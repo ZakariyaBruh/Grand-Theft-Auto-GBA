@@ -12,9 +12,9 @@ export function OfferWall({ tally }: { tally: Tally }) {
   const url = wallUrl(tally.uid);
   return (
     <section id="offers" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
-      <h2 className="text-3xl font-extrabold tracking-tight">The surveys</h2>
+      <h2 className="text-3xl font-extrabold tracking-tight">The Sovereign Offer Wall (it’s an iframe)</h2>
       <p className="mt-2 text-muted max-w-xl">
-        Blank? Your ad blocker is doing its job and ruining mine.{' '}
+        If this appears blank, your ad blocker is performing admirably and ruining my afternoon.{' '}
         <a href={url} target="_blank" rel="noreferrer" className="text-ink underline decoration-accent underline-offset-4 hover:text-accent">
           Open it in its own tab.
         </a>

@@ -10,13 +10,13 @@ export function Hero({ tally }: { tally: Tally }) {
           I’m Zak.<br />I need ${DOLLARS_PER_OFFER.toFixed(2)}.
         </h1>
         <p className="mt-6 text-xl text-ink/80 max-w-lg">
-          Finish one survey and I get that. You get nothing. I’ve thought about it a lot and I’m comfortable with it.
+          Complete one survey and CPAGrip remits that sum to me. You receive nothing. I’ve reviewed this arrangement at length and I’m pretty comfortable with it.
         </p>
 
         <ol className="mt-10 space-y-3 max-w-md text-lg">
-          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">1</span><span>Pick an offer below.</span></li>
-          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">2</span><span>Finish it. About four minutes and one question about your car insurance.</span></li>
-          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">3</span><span>Wait fifteen seconds. Your Void Points appear by themselves. I can’t fake them, I checked.</span></li>
+          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">1</span><span>Select an offer below. Any offer. Don’t overthink it.</span></li>
+          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">2</span><span>Complete it. Roughly four minutes, one of which concerns your car insurance.</span></li>
+          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">3</span><span>Await fifteen seconds. Your Void Points materialise unprompted. I cannot fake them. I looked into it.</span></li>
         </ol>
 
         <a href="#offers" className="btn mt-10 inline-block rounded-full px-7 py-3 font-semibold">
