@@ -1,10 +1,10 @@
 const items: [string, string, string][] = [
-  ['What do I get?', 'Points and a few perks.', 'No cash, goods or crypto. The perks are a session timer, a privacy checklist and a printable certificate.'],
-  ['Is it a scam?', 'No. Nothing is promised to you.', 'Scams promise payouts. This one says up front that you get none. The offers themselves belong to CPA Grip.'],
-  ['Where do my answers go?', 'To the survey sponsor.', 'This site has no database and stores nothing except your points count, in your own browser. Sponsors will use your answers and email as they see fit.'],
+  ['What do I get?', 'Void Points, a timer and a PDF.', 'No cash, goods or crypto. The perks are a session timer, a privacy checklist and a printable certificate.'],
+  ['Is it a scam?', 'No. A scam would promise you something.', 'Scams promise payouts. This one says up front that you get none, which is the most honest thing on the internet. The offers themselves belong to CPAGrip.'],
+  ['Where do my answers go?', 'To the survey sponsor.', 'This site stores a random ID and your points count, nothing else. The survey sponsors will use your answers and email with the enthusiasm you’d expect.'],
   ['How much does Zak get?', 'Roughly $0.80 to $2.10 per finished offer.', 'Only offers that actually complete count, and payouts vary by offer and country.'],
-  ['Can I do several?', 'Yes, as many as you like.', 'Some offers disqualify you partway through. That is normal and nobody gets paid for those.'],
-  ['Why not get a normal job?', 'This is a side project.', 'It costs nothing to run and I wanted to build something small.'],
+  ['Can I do several?', 'Yes. Zak’s grocery list is bottomless.', 'Some offers disqualify you partway through. That is normal and nobody gets paid for those.'],
+  ['Why not get a normal job?', 'Meetings. Mostly meetings.', 'This portal has no standing meetings, no Q4 roadmap and no synergy. Also I like making small things.'],
 ];
 
 export function Faq() {

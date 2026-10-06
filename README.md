@@ -1,12 +1,27 @@
 # Liquid Void
 
-A small portal that embeds a CPA Grip offer wall. You do a survey, Zak gets paid, you get a points tally and a few small perks (a session timer, a privacy checklist, a printable certificate).
+A black liquid-glass portal around a CPAGrip offer wall. You do an offer, Zak gets paid, you get Void Points (worth what they sound like) and a few small perks.
 
-## Run
+Points are **verified server-side**: the browser generates a random ID, passes it to the offer wall as `tracking_id`, and CPAGrip's postback tells `/api/postback` when an offer really completed. The browser can only read its balance, never write it.
+
+## Deploy on Vercel
+
+1. Import the repo into Vercel.
+2. Add an **Upstash Redis** store from the Vercel Marketplace (sets `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`).
+3. Set `POSTBACK_SECRET` to a long random string.
+4. In the CPAGrip dashboard set the postback URL to:
+
+   ```
+   https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={tracking_id}&txid={...}
+   ```
+
+   Replace each `{macro}` with the macro CPAGrip shows for your account (user/tracking id, and a unique conversion id for `txid`). If your param names differ, set `POSTBACK_UID_PARAM` / `POSTBACK_TXID_PARAM`. If the offer wall uses a different query param than `tracking_id` for the user id, change `TRACKING_PARAM` in `src/lib/config.ts`.
+
+Each `txid` is credited once, so postback retries don't double-count.
+
+## Local
 
 ```
 npm install
-npm run dev
+npm run dev     # UI only; /api needs `vercel dev`
 ```
-
-`npm run build` makes a static bundle in `dist/`. No server or API keys needed.

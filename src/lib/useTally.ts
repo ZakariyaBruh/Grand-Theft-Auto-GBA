@@ -1,26 +1,44 @@
 import { useCallback, useEffect, useState } from 'react';
-import { POINTS_PER_OFFER } from './config';
 
-const KEY = 'liquid-void:offers';
+const UID_KEY = 'liquid-void:uid';
 
-function read(): number {
+function getUid(): string {
   try {
-    const n = parseInt(localStorage.getItem(KEY) ?? '0', 10);
-    return Number.isFinite(n) && n > 0 ? n : 0;
+    let id = localStorage.getItem(UID_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(UID_KEY, id);
+    }
+    return id;
   } catch {
-    return 0;
+    return crypto.randomUUID();
   }
 }
 
+export type Status = 'loading' | 'ok' | 'offline';
+
+/** Points are credited server-side by the CPAGrip postback; the browser only reads them. */
 export function useTally() {
-  const [offers, setOffers] = useState(read);
+  const [uid] = useState(getUid);
+  const [data, setData] = useState({ points: 0, offers: 0 });
+  const [status, setStatus] = useState<Status>('loading');
+
+  const refresh = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/points?uid=${uid}`);
+      if (!r.ok) throw new Error(String(r.status));
+      setData(await r.json());
+      setStatus('ok');
+    } catch {
+      setStatus('offline');
+    }
+  }, [uid]);
 
   useEffect(() => {
-    try { localStorage.setItem(KEY, String(offers)); } catch { /* storage blocked */ }
-  }, [offers]);
+    refresh();
+    const t = window.setInterval(() => { if (!document.hidden) refresh(); }, 15000);
+    return () => window.clearInterval(t);
+  }, [refresh]);
 
-  const add = useCallback(() => setOffers(n => n + 1), []);
-  const undo = useCallback(() => setOffers(n => Math.max(0, n - 1)), []);
-
-  return { offers, points: offers * POINTS_PER_OFFER, add, undo };
+  return { uid, ...data, status, refresh };
 }

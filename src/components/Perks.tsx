@@ -9,9 +9,9 @@ interface Perk {
 }
 
 const PERKS: Perk[] = [
-  { id: 'checklist', title: 'Privacy checklist', blurb: 'Six habits that keep survey spam out of your real inbox.', cost: 100 },
-  { id: 'timer', title: 'Session timer', blurb: 'Cap a session at 25 minutes so a survey does not eat your evening.', cost: 300 },
-  { id: 'certificate', title: 'Certificate', blurb: 'A printable certificate with your name on it. Frame it or don’t.', cost: 500 },
+  { id: 'checklist', title: 'Privacy checklist', blurb: 'Six habits that keep survey spam out of your real inbox. The only perk with actual value.', cost: 100 },
+  { id: 'timer', title: 'Session timer', blurb: 'Cap a session at 25 minutes so Zak’s coffee fund doesn’t eat your evening.', cost: 300 },
+  { id: 'certificate', title: 'Certificate', blurb: 'A printable certificate proving you did this on purpose. Frame it or don’t.', cost: 500 },
 ];
 
 const CHECKLIST = [
@@ -27,12 +27,12 @@ export function Perks({ points }: { points: number }) {
   const next = PERKS.find(p => points < p.cost);
 
   return (
-    <section id="perks" className="border-t border-line bg-card">
+    <section id="perks" className="border-t border-line">
       <div className="max-w-5xl mx-auto px-5 py-14">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-serif text-3xl">Perks</h2>
           <p className="text-muted tabular-nums">
-            {points.toLocaleString()} pts
+            {points.toLocaleString()} void pts
             {next && <> · {(next.cost - points).toLocaleString()} to unlock “{next.title}”</>}
           </p>
         </div>
@@ -41,7 +41,7 @@ export function Perks({ points }: { points: number }) {
           {PERKS.map(perk => {
             const open = points >= perk.cost;
             return (
-              <article key={perk.id} className={`rounded-lg border p-5 ${open ? 'border-ink bg-paper' : 'border-line border-dashed'}`}>
+              <article key={perk.id} className={`rounded-lg border p-5 ${open ? 'glass border-white/25' : 'border-line border-dashed'}`}>
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium">{perk.title}</h3>
                   {!open && (
@@ -107,10 +107,10 @@ function Timer() {
       <p className="font-serif text-4xl tabular-nums">{m}:{String(s).padStart(2, '0')}</p>
       <p className="text-sm text-muted h-5">{left <= 0 ? 'Time. Stand up and stretch.' : running ? 'Running' : ''}</p>
       <div className="mt-2 flex gap-2 text-sm">
-        <button onClick={() => setRunning(r => !r)} disabled={left <= 0} className="rounded border border-ink px-3 py-1 cursor-pointer disabled:opacity-40">
+        <button onClick={() => setRunning(r => !r)} disabled={left <= 0} className="glass-btn rounded px-3 py-1 cursor-pointer disabled:opacity-40">
           {running ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { setRunning(false); setLeft(SESSION_SECONDS); }} className="rounded border border-line px-3 py-1 cursor-pointer">
+        <button onClick={() => { setRunning(false); setLeft(SESSION_SECONDS); }} className="glass-btn rounded px-3 py-1 cursor-pointer">
           Reset
         </button>
       </div>
@@ -129,12 +129,12 @@ function Cert() {
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Anonymous Benefactor"
-        className="mt-1 w-full rounded border border-line bg-white px-3 py-1.5 text-sm"
+        className="mt-1 w-full rounded border border-line bg-black/40 px-3 py-1.5 text-sm"
       />
-      <div id="certificate-print" className="mt-3 border border-ink p-4 text-center bg-white">
+      <div id="certificate-print" className="mt-3 border border-white/30 p-4 text-center bg-black/40">
         <p className="text-[11px] uppercase tracking-wide text-muted">Certificate of zero return</p>
         <p className="font-serif text-xl mt-1">{name || 'Anonymous Benefactor'}</p>
-        <p className="text-xs text-muted mt-1">did surveys so Zak could eat. Received in return: $0.00.</p>
+        <p className="text-xs text-muted mt-1">did surveys so Zak could eat. Received in return: $0.00 and a PDF.</p>
         <p className="text-xs mt-2">{date}</p>
       </div>
       <button onClick={() => window.print()} className="mt-2 flex items-center gap-1.5 text-sm underline underline-offset-2 cursor-pointer">
