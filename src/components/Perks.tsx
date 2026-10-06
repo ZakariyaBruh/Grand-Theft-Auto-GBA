@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Lock, Printer } from 'lucide-react';
+import { Printer } from 'lucide-react';
 
 interface Perk {
   id: string;
@@ -9,54 +9,46 @@ interface Perk {
 }
 
 const PERKS: Perk[] = [
-  { id: 'checklist', title: 'Privacy checklist', blurb: 'Six habits that keep survey spam out of your real inbox. The only perk with actual value.', cost: 100 },
-  { id: 'timer', title: 'Session timer', blurb: 'Cap a session at 25 minutes so Zak’s coffee fund doesn’t eat your evening.', cost: 300 },
-  { id: 'certificate', title: 'Certificate', blurb: 'A printable certificate proving you did this on purpose. Frame it or don’t.', cost: 500 },
+  { id: 'checklist', title: 'A checklist so you stop getting spam', blurb: 'The only perk here that is actually good for you.', cost: 100 },
+  { id: 'timer', title: 'A 25-minute timer', blurb: 'Surveys expand to fill the time you give them. This stops that.', cost: 300 },
+  { id: 'certificate', title: 'A certificate', blurb: 'For the wall, the fridge, or the drawer of things you are not ready to throw out.', cost: 500 },
 ];
 
 const CHECKLIST = [
-  'Use a throwaway email address, not your main one.',
+  'Use a throwaway email, not the one your bank has.',
   'Skip any step that asks for a card number.',
-  'Never give your full phone number to a “free trial”.',
-  'Close the tab if the offer asks you to install something you didn’t pick.',
-  'Read the disqualification line: if it says “screen out”, move on fast.',
-  'Unsubscribe from the first promo email you get.',
+  'Do not give a “free trial” your real phone number.',
+  'Close the tab if it wants to install something you did not pick.',
+  'If it says “screen out”, leave. You are not missing anything.',
+  'Unsubscribe from the first promo email. They get worse.',
 ];
 
 export function Perks({ points }: { points: number }) {
   const next = PERKS.find(p => points < p.cost);
 
   return (
-    <section id="perks" className="border-t border-line">
-      <div className="max-w-5xl mx-auto px-5 py-14">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-serif text-3xl">Perks</h2>
-          <p className="text-muted tabular-nums">
-            {points.toLocaleString()} void pts
-            {next && <> · {(next.cost - points).toLocaleString()} to unlock “{next.title}”</>}
-          </p>
-        </div>
+    <section id="perks" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
+      <h2 className="text-3xl font-extrabold tracking-tight">What your points unlock</h2>
+      <p className="mt-2 text-muted max-w-xl">
+        Void Points can’t be spent anywhere. These are the three things they do.
+        {next ? ` ${(next.cost - points).toLocaleString()} more for the next one.` : ' You have all of them. Go outside.'}
+      </p>
 
-        <div className="mt-6 grid md:grid-cols-3 gap-4">
-          {PERKS.map(perk => {
-            const open = points >= perk.cost;
-            return (
-              <article key={perk.id} className={`rounded-lg border p-5 ${open ? 'glass border-white/25' : 'border-line border-dashed'}`}>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium">{perk.title}</h3>
-                  {!open && (
-                    <span className="flex items-center gap-1 text-xs text-muted">
-                      <Lock className="w-3 h-3" /> {perk.cost}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-muted">{perk.blurb}</p>
-                {open && <div className="mt-4">{perk.id === 'checklist' ? <Checklist /> : perk.id === 'timer' ? <Timer /> : <Cert />}</div>}
-              </article>
-            );
-          })}
-        </div>
-      </div>
+      <ul className="mt-8 divide-y divide-line border-y border-line">
+        {PERKS.map(perk => {
+          const open = points >= perk.cost;
+          return (
+            <li key={perk.id} className="py-6 grid sm:grid-cols-[6rem_1fr] gap-x-6 gap-y-3">
+              <span className={`font-mono text-3xl ${open ? 'text-accent' : 'text-muted'}`}>{perk.cost}</span>
+              <div>
+                <h3 className={`text-xl font-semibold ${open ? '' : 'text-ink/60'}`}>{perk.title}</h3>
+                <p className="text-muted">{open ? perk.blurb : `${perk.blurb} (${perk.cost - points} points away)`}</p>
+                {open && <div className="mt-5 max-w-md">{perk.id === 'checklist' ? <Checklist /> : perk.id === 'timer' ? <Timer /> : <Cert />}</div>}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
@@ -104,13 +96,13 @@ function Timer() {
 
   return (
     <div>
-      <p className="font-serif text-4xl tabular-nums">{m}:{String(s).padStart(2, '0')}</p>
-      <p className="text-sm text-muted h-5">{left <= 0 ? 'Time. Stand up and stretch.' : running ? 'Running' : ''}</p>
+      <p className="font-mono text-5xl tabular-nums">{m}:{String(s).padStart(2, '0')}</p>
+      <p className="text-sm text-muted h-5">{left <= 0 ? 'Time. Stand up. The survey will still be there, sadly.' : running ? 'Running' : ''}</p>
       <div className="mt-2 flex gap-2 text-sm">
-        <button onClick={() => setRunning(r => !r)} disabled={left <= 0} className="glass-btn rounded px-3 py-1 cursor-pointer disabled:opacity-40">
+        <button onClick={() => setRunning(r => !r)} disabled={left <= 0} className="btn rounded-full px-4 py-1 cursor-pointer disabled:opacity-40">
           {running ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { setRunning(false); setLeft(SESSION_SECONDS); }} className="glass-btn rounded px-3 py-1 cursor-pointer">
+        <button onClick={() => { setRunning(false); setLeft(SESSION_SECONDS); }} className="btn rounded-full px-4 py-1">
           Reset
         </button>
       </div>
@@ -129,15 +121,15 @@ function Cert() {
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Anonymous Benefactor"
-        className="mt-1 w-full rounded border border-line bg-black/40 px-3 py-1.5 text-sm"
+        className="mt-1 w-full rounded-lg border border-line bg-black/40 px-3 py-1.5 text-sm"
       />
-      <div id="certificate-print" className="mt-3 border border-white/30 p-4 text-center bg-black/40">
-        <p className="text-[11px] uppercase tracking-wide text-muted">Certificate of zero return</p>
-        <p className="font-serif text-xl mt-1">{name || 'Anonymous Benefactor'}</p>
-        <p className="text-xs text-muted mt-1">did surveys so Zak could eat. Received in return: $0.00 and a PDF.</p>
+      <div id="certificate-print" className="mt-3 border border-white/30 rounded-lg p-4 text-center bg-black/40">
+        <p className="text-[11px] uppercase tracking-widest text-muted">Certificate of zero return</p>
+        <p className="text-2xl font-extrabold mt-1">{name || 'Anonymous Benefactor'}</p>
+        <p className="text-xs text-muted mt-1">did surveys so Zak could eat. Received in return: this.</p>
         <p className="text-xs mt-2">{date}</p>
       </div>
-      <button onClick={() => window.print()} className="mt-2 flex items-center gap-1.5 text-sm underline underline-offset-2 cursor-pointer">
+      <button onClick={() => window.print()} className="mt-2 flex items-center gap-1.5 text-sm underline decoration-accent underline-offset-4 cursor-pointer">
         <Printer className="w-3.5 h-3.5" /> Print or save PDF
       </button>
     </div>

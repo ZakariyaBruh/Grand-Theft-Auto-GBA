@@ -2,11 +2,9 @@ import { WALL_ID } from '../lib/config';
 
 export function Footer() {
   return (
-    <footer className="border-t border-line py-8 text-sm text-muted">
-      <div className="max-w-5xl mx-auto px-5 flex flex-wrap justify-between gap-2">
-        <span>Liquid Void · all proceeds go to Zak, all regrets go to you</span>
-        <span>Offer wall {WALL_ID}</span>
-      </div>
+    <footer className="max-w-5xl mx-auto px-5 py-10 border-t border-line text-sm text-muted flex flex-wrap justify-between gap-2">
+      <span>Liquid Void. Built by someone who could have been doing literally anything else.</span>
+      <span className="font-mono">wall {WALL_ID}</span>
     </footer>
   );
 }

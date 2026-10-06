@@ -13,7 +13,7 @@ export default function App() {
     <>
       <Header points={tally.points} />
       <main>
-        <Hero />
+        <Hero tally={tally} />
         <OfferWall tally={tally} />
         <Perks points={tally.points} />
         <Faq />

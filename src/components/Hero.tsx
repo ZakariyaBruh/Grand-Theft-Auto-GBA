@@ -1,38 +1,30 @@
-import { DOLLARS_PER_OFFER, MINUTES_PER_OFFER } from '../lib/config';
+import { DOLLARS_PER_OFFER } from '../lib/config';
+import type { Tally } from '../lib/useTally';
+import { Receipt } from './Receipt';
 
-const steps = [
-  ['1', 'Pick an offer', 'Surveys, quizzes, app trials. Fun, allegedly.'],
-  ['2', 'Finish it', `About ${MINUTES_PER_OFFER} minutes.`],
-  ['3', 'Wait ~15 seconds', 'Points arrive by themselves. Magic.'],
-];
-
-export function Hero() {
+export function Hero({ tally }: { tally: Tally }) {
   return (
-    <section className="max-w-5xl mx-auto px-5 pt-14 pb-12 md:pt-24 md:pb-16">
-      <h1 className="font-serif text-4xl sm:text-6xl leading-[1.05] max-w-3xl">
-        You suffer a survey. Zak gets about ${DOLLARS_PER_OFFER.toFixed(2)}.
-      </h1>
-      <p className="mt-5 text-lg text-muted max-w-xl">
-        You get no money. You get Void Points, which are worth exactly what they sound like, plus a few tools that make surveys less miserable.
-      </p>
-      <a
-        href="#offers"
-        className="glass-btn mt-8 inline-block rounded-xl px-6 py-3 font-medium"
-      >
-        Donate my time
-      </a>
+    <section className="max-w-5xl mx-auto px-5 pt-10 pb-20 md:pt-20 grid md:grid-cols-[1fr_auto] gap-14 items-start">
+      <div>
+        <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight leading-[0.95]">
+          I’m Zak.<br />I need ${DOLLARS_PER_OFFER.toFixed(2)}.
+        </h1>
+        <p className="mt-6 text-xl text-ink/80 max-w-lg">
+          Finish one survey and I get that. You get nothing. I’ve thought about it a lot and I’m comfortable with it.
+        </p>
 
-      <ol className="mt-14 grid sm:grid-cols-3 gap-4">
-        {steps.map(([n, title, sub]) => (
-          <li key={n} className="flex gap-3 border-t border-line pt-4">
-            <span className="font-serif text-2xl text-accent leading-none">{n}</span>
-            <div>
-              <p className="font-medium">{title}</p>
-              <p className="text-sm text-muted">{sub}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+        <ol className="mt-10 space-y-3 max-w-md text-lg">
+          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">1</span><span>Pick an offer below.</span></li>
+          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">2</span><span>Finish it. About four minutes and one question about your car insurance.</span></li>
+          <li className="grid grid-cols-[1.5rem_1fr]"><span className="font-mono text-accent">3</span><span>Wait fifteen seconds. Your Void Points appear by themselves. I can’t fake them, I checked.</span></li>
+        </ol>
+
+        <a href="#offers" className="btn mt-10 inline-block rounded-full px-7 py-3 font-semibold">
+          Fine, show me the surveys
+        </a>
+      </div>
+
+      <div className="md:pt-4"><Receipt tally={tally} /></div>
     </section>
   );
 }

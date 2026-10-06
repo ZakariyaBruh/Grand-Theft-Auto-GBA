@@ -42,3 +42,5 @@ export function useTally() {
 
   return { uid, ...data, status, refresh };
 }
+
+export type Tally = ReturnType<typeof useTally>;
