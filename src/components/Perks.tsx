@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Printer } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Reveal } from './Reveal';
+import { Rule } from './Rule';
+import { SplitWords } from './SplitWords';
 
 interface Perk {
   id: string;
@@ -29,19 +31,34 @@ export function Perks({ points }: { points: number }) {
   const next = PERKS.find(p => points < p.cost);
 
   return (
-    <section id="perks" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
-      <Reveal><h2 className="text-3xl font-extrabold tracking-tight">The Void Point Redemption Programme</h2>
+    <section id="perks" className="max-w-5xl mx-auto px-5 pb-16">
+      <Rule />
+      <Reveal><SplitWords inView text="The Void Point Redemption Programme" className="text-3xl font-extrabold tracking-tight" />
       <p className="mt-2 text-muted max-w-xl">
         Void Points hold no monetary value and cannot be spent anywhere. They do, however, unlock these three things.
         {next ? ` ${(next.cost - points).toLocaleString()} more for the next one.` : ' You have all of them. Go outside.'}
       </p></Reveal>
+
+      <div className="mt-8 relative h-1.5 rounded-full bg-white/10">
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full bg-accent"
+          initial={{ width: 0 }}
+          whileInView={{ width: `${Math.min(points / 500, 1) * 100}%` }}
+          animate={{ width: `${Math.min(points / 500, 1) * 100}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        />
+        {PERKS.map(p => (
+          <span key={p.id} style={{ left: `${(p.cost / 500) * 100}%` }} className={`absolute -top-1 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-paper ${points >= p.cost ? 'bg-accent' : 'bg-muted'}`} />
+        ))}
+      </div>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">
         {PERKS.map((perk, i) => {
           const open = points >= perk.cost;
           return (
             <Reveal as="li" delay={i * 0.1} key={perk.id} className="py-6 grid sm:grid-cols-[6rem_1fr] gap-x-6 gap-y-3">
-              <span className={`font-mono text-3xl ${open ? 'text-accent' : 'text-muted'}`}>{perk.cost}</span>
+              <motion.span animate={{ scale: open ? [1, 1.25, 1] : 1 }} transition={{ duration: 0.5 }} className={`font-mono text-3xl origin-left ${open ? 'text-accent' : 'text-muted'}`}>{perk.cost}</motion.span>
               <div>
                 <h3 className={`text-xl font-semibold ${open ? '' : 'text-ink/60'}`}>{perk.title}</h3>
                 <p className="text-muted">{open ? perk.blurb : `${perk.blurb} (${perk.cost - points} points away)`}</p>

@@ -1,5 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { Reveal } from './Reveal';
+import { Rule } from './Rule';
+import { SplitWords } from './SplitWords';
 import { wallUrl, POINTS_PER_OFFER } from '../lib/config';
 import type { Tally, Status } from '../lib/useTally';
 
@@ -12,8 +14,9 @@ const statusText: Record<Status, string> = {
 export function OfferWall({ tally }: { tally: Tally }) {
   const url = wallUrl(tally.uid);
   return (
-    <section id="offers" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
-      <Reveal><h2 className="text-3xl font-extrabold tracking-tight">The Sovereign Offer Wall</h2>
+    <section id="offers" className="max-w-5xl mx-auto px-5 pb-16">
+      <Rule />
+      <Reveal><SplitWords inView text="The Sovereign Offer Wall" className="text-3xl font-extrabold tracking-tight" />
       <p className="mt-2 text-muted max-w-xl">
         Surveys, quizzes and trials, curated by nobody. Prefer a bigger window?{' '}
         <a href={url} target="_blank" rel="noreferrer" className="text-ink underline decoration-accent underline-offset-4 hover:text-accent">
@@ -24,7 +27,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
       <Reveal delay={0.1}><iframe
         src={url}
         title="Offer wall"
-        className="glass mt-6 w-full h-[560px] rounded-3xl"
+        className="glass mt-6 w-full h-[640px] rounded-3xl"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
       /></Reveal>
 

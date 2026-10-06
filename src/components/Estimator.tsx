@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { Reveal } from './Reveal';
+import { Rule } from './Rule';
+import { SplitWords } from './SplitWords';
 import { DOLLARS_PER_OFFER, MINUTES_PER_OFFER } from '../lib/config';
 
 const equivalency = (n: number) => {
@@ -26,9 +28,10 @@ export function Estimator() {
   const [n, setN] = useState(5);
 
   return (
-    <section id="estimator" className="max-w-5xl mx-auto px-5 py-16 border-t border-line">
+    <section id="estimator" className="max-w-5xl mx-auto px-5 pb-16">
+      <Rule />
       <Reveal>
-      <h2 className="text-3xl font-extrabold tracking-tight">The Time Sacrifice Estimator</h2>
+      <SplitWords inView text="The Time Sacrifice Estimator" className="text-3xl font-extrabold tracking-tight" />
       <p className="mt-2 text-muted max-w-xl">
         Declare how many surveys you are prepared to suffer. Observe your return remain rigidly at zero while Zak ascends the economic ladder. (One rung.)
       </p>
