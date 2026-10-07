@@ -4,7 +4,7 @@ import { UID_RE } from './_store.js';
 
 /**
  * Survey list for one visitor from the CPX Research API.
- * Env: CPX_APP_ID and CPX_SECURE_HASH (secure_hash = md5("<ext_user_id>-<app secure hash>"), per the CPX docs).
+ * Env: CPX_APP_ID (or VITE_CPX_APP_ID) and CPX_SECURE_HASH (secure_hash = md5("<ext_user_id>-<app secure hash>"), per the CPX docs).
  *
  * CPX needs the visitor's own IP address and user agent: it uses them to decide which surveys that person can
  * actually take. We pass the real ones through untouched.
@@ -31,7 +31,7 @@ interface CpxSurvey {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const appId = (process.env.CPX_APP_ID ?? '').trim();
+  const appId = (process.env.CPX_APP_ID ?? process.env.VITE_CPX_APP_ID ?? '').trim();
   if (!appId) return res.status(503).json({ error: 'CPX app id is not configured' });
 
   const uid = one(req.query.uid);
