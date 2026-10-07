@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 // Import Vercel API handlers
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
-import wallHandler from './api/wall.js';
+import surveysHandler from './api/surveys.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,7 +38,7 @@ async function startServer() {
     }
   });
 
-  app.get('/api/wall', (req, res) => wallHandler(req as any, res as any));
+  app.get('/api/surveys', (req, res) => surveysHandler(req as any, res as any));
 
   // Serve static assets / HTML
   if (!isProd) {

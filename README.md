@@ -2,7 +2,9 @@
 
 A black liquid-glass portal around a CPX Research survey wall. You do a survey, Zak gets paid, you get Void Points (worth what they sound like) and a few small perks.
 
-Points are **verified server-side**: the browser creates a random ID and passes it to the CPX wall as `ext_user_id`. When a survey completes, CPX calls `/api/postback`, which credits that ID. The browser can only read its balance, never write it.
+Surveys come from the CPX Research **API** (`api/surveys.ts`) and are rendered by our own UI, so layout, sorting and copy are ours. The visitor's real IP and user agent are passed to CPX so it can match surveys to them.
+
+Points are **verified server-side**: the browser creates a random ID that CPX receives as `ext_user_id`. When a survey completes, CPX calls `/api/postback`, which credits that ID. The browser can only read its balance, never write it.
 
 ## Deploy on Vercel
 
@@ -28,7 +30,7 @@ https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={tr
 
 - `status=1` earns points once per `trans_id`; `status=2` (cancelled/fraud, sent later) takes them back; a payout of 0 (screen-out) earns nothing.
 - Leave the separate Screen Out Postback field empty.
-- The wall's `secure_hash` is computed on the server (`api/wall.ts`) as md5(`<user id>-<CPX_SECURE_HASH>`). CPX doesn't publish that formula, so confirm the wall loads; if it rejects the hash, that one line is what to change.
+- `secure_hash` is computed on the server as md5(`<user id>-<CPX_SECURE_HASH>`), as in the CPX docs.
 
 ## Local
 
