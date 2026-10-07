@@ -6,11 +6,12 @@ Points are **verified server-side**: the browser creates a random ID and passes 
 
 ## Deploy on Vercel
 
-Set these environment variables, then redeploy (`VITE_` variables are baked in at build time):
+Set these environment variables, then redeploy:
 
 | Name | Value |
 | --- | --- |
-| `VITE_CPX_APP_ID` | your CPX Research app ID |
+| `CPX_APP_ID` | your CPX Research app ID |
+| `CPX_SECURE_HASH` | the app's secure hash from the CPX publisher area (only if that option is on) |
 | `POSTBACK_SECRET` | a long random string (32+ letters/digits) |
 | `TURSO_API` | the Turso database auth token (`turso db tokens create <db>`) |
 | `TURSO_DATABASE_URL` | optional, defaults to this project's database |
@@ -28,7 +29,7 @@ https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={tr
 
 - `status=1` earns points once per `trans_id`; `status=2` (cancelled/fraud, sent later) takes them back; a payout of 0 (screen-out) earns nothing.
 - Leave the separate Screen Out Postback field empty.
-- Leave "secure hash" off for now: the secret in the URL is what blocks forged calls.
+- The wall's `secure_hash` is computed on the server (`api/wall.ts`) as md5(`<user id>-<CPX_SECURE_HASH>`). CPX doesn't publish that formula, so confirm the wall loads; if it rejects the hash, that one line is what to change.
 
 ## Local
 

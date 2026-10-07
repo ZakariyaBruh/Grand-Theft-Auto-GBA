@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
 import hyperbeamHandler from './api/hyperbeam.js';
+import wallHandler from './api/wall.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +38,8 @@ async function startServer() {
       res.status(500).send('Internal Server Error');
     }
   });
+
+  app.get('/api/wall', (req, res) => wallHandler(req as any, res as any));
 
   app.get('/api/hyperbeam', async (req, res) => {
     try {
