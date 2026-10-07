@@ -24,7 +24,7 @@ Each `txid` is credited once, so postback retries don't double-count.
 Main Postback URL (paste into the box, replacing the two values):
 
 ```
-https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={trans_id}&status={status}&amount={amount_usd}
+https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={trans_id}&status={status}&amount_usd={amount_usd}&amount_local={amount_local}
 ```
 
 - `{user_id}` must be the visitor's ID: when you embed the CPX wall, pass our ID as its user id (`ext_user_id`).

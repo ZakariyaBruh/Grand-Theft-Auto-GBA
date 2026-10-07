@@ -10,7 +10,7 @@ import { UID_RE, creditOffer, reverseOffer, storeConfigured } from './_store.js'
  *
  * Optional extras (CPX Research and similar networks send them):
  *   status=1 completed, status=2 reversed/cancelled  -> only status=1 earns points; status=2 takes them back
- *   amount=<payout>  -> if present and not > 0 (screen-outs pay nothing), no points are given
+ *   amount_usd=<payout> (or amount=)  -> if present and not > 0 (screen-outs pay nothing), no points are given
  */
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
 
@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!txid || txid.length > 128) return res.status(400).send('bad txid');
 
   const status = first(req.query.status);
-  const amountRaw = first(req.query.amount);
+  const amountRaw = first(req.query.amount_usd) || first(req.query.amount);
 
   try {
     if (status === '2') {
