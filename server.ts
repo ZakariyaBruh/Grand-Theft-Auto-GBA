@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
 import surveysHandler from './api/surveys.js';
+import cpxConfigHandler from './api/cpx-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +38,8 @@ async function startServer() {
       res.status(500).send('Internal Server Error');
     }
   });
+
+  app.get('/api/cpx-config', (req, res) => cpxConfigHandler(req as any, res as any));
 
   app.get('/api/surveys', (req, res) => surveysHandler(req as any, res as any));
 
