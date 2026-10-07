@@ -29,6 +29,8 @@ function db(): Promise<Client> {
       ],
       'write',
     ).then(() => undefined);
+    // A failed init (bad token, network blip) must not stay cached: drop it so the next request retries.
+    ready.catch(() => { client = undefined; ready = undefined; });
   }
   return ready!.then(() => client!);
 }

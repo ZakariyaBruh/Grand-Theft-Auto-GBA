@@ -28,7 +28,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
         src={url}
         title="Offer wall"
         className="glass mt-6 w-full h-[640px] rounded-3xl"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation-by-user-activation"
       /></Reveal>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
