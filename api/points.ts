@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { UID_RE, redis, storeConfigured } from './_store';
+import { UID_RE, redis, storeConfigured } from './_store.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const uid = String(req.query.uid ?? '');

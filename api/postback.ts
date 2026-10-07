@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { timingSafeEqual } from 'node:crypto';
-import { POINTS_PER_OFFER, UID_RE, redis, storeConfigured } from './_store';
+import { POINTS_PER_OFFER, UID_RE, redis, storeConfigured } from './_store.js';
 
 /**
  * CPAGrip postback receiver. Configure the postback URL in the CPAGrip dashboard as
@@ -11,7 +11,7 @@ import { POINTS_PER_OFFER, UID_RE, redis, storeConfigured } from './_store';
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
 
 function secretOk(given: string): boolean {
-  const want = process.env.POSTBACK_SECRET ?? '';
+  const want = process.env.POSTBACK_SECRET || (process.env.VERCEL || process.env.NODE_ENV === 'production' ? '' : 'dev-secret');
   if (!want) return false;
   const a = Buffer.from(given);
   const b = Buffer.from(want);
