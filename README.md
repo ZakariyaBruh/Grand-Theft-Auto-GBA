@@ -15,7 +15,6 @@ Set these environment variables, then redeploy:
 | `POSTBACK_SECRET` | a long random string (32+ letters/digits) |
 | `TURSO_API` | the Turso database auth token (`turso db tokens create <db>`) |
 | `TURSO_DATABASE_URL` | optional, defaults to this project's database |
-| `HYPERBEAM_KEY` | optional, powers the cloud-browser perk |
 
 Tables are created automatically on first use.
 

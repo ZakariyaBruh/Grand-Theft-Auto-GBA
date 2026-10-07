@@ -20,7 +20,7 @@ export default function App() {
         <Hero tally={tally} />
         <OfferWall tally={tally} />
         <Estimator />
-        <Perks points={tally.points} uid={tally.uid} />
+        <Perks points={tally.points} />
         <Faq />
       </main>
       <Footer />

@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url';
 // Import Vercel API handlers
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
-import hyperbeamHandler from './api/hyperbeam.js';
 import wallHandler from './api/wall.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -40,15 +39,6 @@ async function startServer() {
   });
 
   app.get('/api/wall', (req, res) => wallHandler(req as any, res as any));
-
-  app.get('/api/hyperbeam', async (req, res) => {
-    try {
-      await hyperbeamHandler(req as any, res as any);
-    } catch (error) {
-      console.error('Error in /api/hyperbeam:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
 
   // Serve static assets / HTML
   if (!isProd) {
