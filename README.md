@@ -7,7 +7,7 @@ Points are **verified server-side**: the browser generates a random ID, passes i
 ## Deploy on Vercel
 
 1. Import the repo into Vercel.
-2. Add an **Upstash Redis** store from the Vercel Marketplace (sets `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`).
+2. Create a Turso database and set `TURSO_API` to its auth token (`turso db tokens create <db>`). The URL defaults to this project's database; override it with `TURSO_DATABASE_URL`. Tables are created automatically on first use.
 3. Set `POSTBACK_SECRET` to a long random string.
 4. In the CPAGrip dashboard set the postback URL to:
 

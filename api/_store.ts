@@ -1,75 +1,80 @@
-// Minimal Upstash Redis REST client, with an in-memory fallback for local dev only
-const URL_ = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+import { createClient, type Client } from '@libsql/client';
 
-// In production (Vercel) the in-memory fallback is off: serverless instances don't share memory,
-// so points would silently vanish. There, a missing Redis config is reported as not configured.
+// Turso (libSQL). On Vercel set TURSO_API (the database auth token) and, optionally, TURSO_DATABASE_URL.
+const DEFAULT_URL = 'libsql://givememoney-zakarius.aws-us-east-1.turso.io';
+const TOKEN = process.env.TURSO_API ?? process.env.TURSO_AUTH_TOKEN;
+const URL_ = process.env.TURSO_DATABASE_URL ?? DEFAULT_URL;
+
 const isProd = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
-const hasRedis = Boolean(URL_ && TOKEN);
-export const storeConfigured = hasRedis || !isProd;
 
-// In-memory fallback database
-const memoryStore = new Map<string, string | number>();
-
-export async function redis(...cmd: (string | number)[]): Promise<unknown> {
-  if (hasRedis) {
-    try {
-      const res = await fetch(URL_!, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(cmd),
-      });
-      if (res.ok) {
-        return ((await res.json()) as { result: unknown }).result;
-      }
-      if (isProd) throw new Error(`Redis ${res.status}`);
-    } catch (e) {
-      if (isProd) throw e;
-      console.warn('Failed to contact Upstash Redis, using in-memory store instead:', e);
-    }
-  }
-  if (isProd) throw new Error('Redis is not configured');
-
-  // Fallback to mock in-memory implementation of Upstash Redis commands
-  const [op, ...args] = cmd;
-  const opUpper = String(op).toUpperCase();
-
-  if (opUpper === 'MGET') {
-    return args.map(key => {
-      const val = memoryStore.get(String(key));
-      return val !== undefined ? String(val) : null;
-    });
-  }
-
-  if (opUpper === 'SET') {
-    const [key, value, ...options] = args;
-    const nxIndex = options.indexOf('NX');
-    if (nxIndex !== -1 && memoryStore.has(String(key))) {
-      return null;
-    }
-    memoryStore.set(String(key), String(value));
-    return 'OK';
-  }
-
-  if (opUpper === 'INCR') {
-    const [key] = args;
-    const current = Number(memoryStore.get(String(key)) ?? 0);
-    const next = current + 1;
-    memoryStore.set(String(key), next);
-    return next;
-  }
-
-  if (opUpper === 'INCRBY') {
-    const [key, value] = args;
-    const increment = Number(value ?? 0);
-    const current = Number(memoryStore.get(String(key)) ?? 0);
-    const next = current + increment;
-    memoryStore.set(String(key), next);
-    return next;
-  }
-
-  throw new Error(`Unsupported Mock Redis command: ${opUpper}`);
-}
+// In production a missing token means "not configured". Locally we fall back to a throwaway file database.
+export const storeConfigured = Boolean(TOKEN) || !isProd;
 
 export const UID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const POINTS_PER_OFFER = 100;
+
+let client: Client | undefined;
+let ready: Promise<void> | undefined;
+
+function db(): Promise<Client> {
+  if (!client) {
+    client = TOKEN
+      ? createClient({ url: URL_, authToken: TOKEN })
+      : createClient({ url: 'file:.local-dev.db' });
+    ready = client.batch(
+      [
+        'CREATE TABLE IF NOT EXISTS users (uid TEXT PRIMARY KEY, points INTEGER NOT NULL DEFAULT 0, offers INTEGER NOT NULL DEFAULT 0)',
+        'CREATE TABLE IF NOT EXISTS conversions (txid TEXT PRIMARY KEY, uid TEXT NOT NULL, created_at INTEGER NOT NULL)',
+        'CREATE TABLE IF NOT EXISTS slots (key TEXT PRIMARY KEY, expires_at INTEGER NOT NULL)',
+      ],
+      'write',
+    ).then(() => undefined);
+  }
+  return ready!.then(() => client!);
+}
+
+export async function getStats(uid: string): Promise<{ points: number; offers: number }> {
+  const c = await db();
+  const r = await c.execute({ sql: 'SELECT points, offers FROM users WHERE uid = ?', args: [uid] });
+  const row = r.rows[0];
+  return { points: Number(row?.points ?? 0), offers: Number(row?.offers ?? 0) };
+}
+
+/** Credits one offer. Each txid is counted once, so postback retries are harmless. Returns true if new. */
+export async function creditOffer(uid: string, txid: string): Promise<boolean> {
+  const c = await db();
+  const tx = await c.transaction('write');
+  try {
+    const ins = await tx.execute({
+      sql: 'INSERT OR IGNORE INTO conversions (txid, uid, created_at) VALUES (?, ?, ?)',
+      args: [txid, uid, Date.now()],
+    });
+    const fresh = ins.rowsAffected === 1;
+    if (fresh) {
+      await tx.execute({
+        sql: `INSERT INTO users (uid, points, offers) VALUES (?, ?, 1)
+              ON CONFLICT(uid) DO UPDATE SET points = points + excluded.points, offers = offers + 1`,
+        args: [uid, POINTS_PER_OFFER],
+      });
+    }
+    await tx.commit();
+    return fresh;
+  } catch (e) {
+    await tx.rollback();
+    throw e;
+  } finally {
+    tx.close();
+  }
+}
+
+/** Takes a rate-limit slot for `seconds`. Returns false if one is already held. */
+export async function claimSlot(key: string, seconds: number): Promise<boolean> {
+  const c = await db();
+  const now = Date.now();
+  const r = await c.execute({
+    sql: `INSERT INTO slots (key, expires_at) VALUES (?, ?)
+          ON CONFLICT(key) DO UPDATE SET expires_at = excluded.expires_at WHERE slots.expires_at <= ?`,
+    args: [key, now + seconds * 1000, now],
+  });
+  return r.rowsAffected === 1;
+}

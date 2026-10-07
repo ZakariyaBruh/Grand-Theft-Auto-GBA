@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { UID_RE, redis, storeConfigured } from './_store.js';
+import { UID_RE, claimSlot, getStats, storeConfigured } from './_store.js';
 
 /** Void Points needed to launch a cloud browser (keep in sync with the perk in Perks.tsx). */
 const REQUIRED_POINTS = 1000;
@@ -15,12 +15,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!UID_RE.test(uid)) return res.status(400).json({ error: 'bad uid' });
 
   try {
-    const [pts] = (await redis('MGET', `pts:${uid}`)) as (string | null)[];
-    if (Number(pts ?? 0) < REQUIRED_POINTS) {
+    const { points } = await getStats(uid);
+    if (points < REQUIRED_POINTS) {
       return res.status(403).json({ error: `Needs ${REQUIRED_POINTS} verified Void Points` });
     }
-    const slot = await redis('SET', `hb:${uid}`, '1', 'NX', 'EX', COOLDOWN_SECONDS);
-    if (slot !== 'OK') {
+    if (!(await claimSlot(`hb:${uid}`, COOLDOWN_SECONDS))) {
       return res.status(429).json({ error: `One cloud browser every ${COOLDOWN_SECONDS / 60} minutes. Try again shortly.` });
     }
 

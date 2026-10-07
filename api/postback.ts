@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { timingSafeEqual } from 'node:crypto';
-import { POINTS_PER_OFFER, UID_RE, redis, storeConfigured } from './_store.js';
+import { UID_RE, creditOffer, storeConfigured } from './_store.js';
 
 /**
  * CPAGrip postback receiver. Configure the postback URL in the CPAGrip dashboard as
@@ -28,10 +28,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!txid || txid.length > 128) return res.status(400).send('bad txid');
 
   // Each conversion id can only be credited once, even if CPAGrip retries.
-  const fresh = await redis('SET', `tx:${txid}`, uid, 'NX', 'EX', 60 * 60 * 24 * 90);
-  if (fresh === 'OK') {
-    await redis('INCRBY', `pts:${uid}`, POINTS_PER_OFFER);
-    await redis('INCR', `offers:${uid}`);
+  try {
+    await creditOffer(uid, txid);
+    return res.status(200).send('1');
+  } catch (e) {
+    console.error('postback failed:', e);
+    return res.status(500).send('error');
   }
-  return res.status(200).send('1');
 }

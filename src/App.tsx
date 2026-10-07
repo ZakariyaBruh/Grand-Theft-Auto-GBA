@@ -52,7 +52,7 @@ export default function App() {
         <div className="fixed bottom-4 right-4 z-50 bg-[#0a0a0c]/90 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-md max-w-xs text-xs flex flex-col gap-2">
           <div className="font-bold text-[#e8ff47]">Dev Simulator</div>
           <p className="text-stone-400 text-[11px] leading-snug">
-            Since Upstash Redis is in-memory by default, use this button to simulate CPAGrip postback webhooks locally.
+            Locally the points live in a throwaway file database, so use this button to simulate CPAGrip postback webhooks locally.
           </p>
           <button
             onClick={simulateSurvey}
