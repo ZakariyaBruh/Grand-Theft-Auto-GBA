@@ -3,9 +3,8 @@ import { timingSafeEqual } from 'node:crypto';
 import { UID_RE, creditOffer, reverseOffer, storeConfigured } from './_store.js';
 
 /**
- * CPAGrip postback receiver. Configure the postback URL in the CPAGrip dashboard as
- *   https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={tracking_id}&txid={...}&payout={...}
- * and replace the {macros} with the ones CPAGrip shows for your account.
+ * CPX Research postback receiver. Main Postback URL in the CPX publisher area:
+ *   https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={trans_id}&status={status}&amount_usd={amount_usd}&amount_local={amount_local}
  * Param names can be remapped with POSTBACK_UID_PARAM / POSTBACK_TXID_PARAM.
  *
  * Optional extras (CPX Research and similar networks send them):
