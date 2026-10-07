@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHash } from 'node:crypto';
+import { isIP } from 'node:net';
 import { UID_RE } from './_store.js';
 
 /**
@@ -13,9 +14,20 @@ const API = 'https://live-api.cpx-research.com/api/get-surveys.php';
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
 
+/** The visitor's real IP, cleaned up (no brackets, port or ::ffff: prefix). CPX returns nothing for a malformed one. */
 function clientIp(req: VercelRequest): string {
-  const fwd = one(req.headers['x-forwarded-for']).split(',')[0]?.trim();
-  return fwd || one(req.headers['x-real-ip']) || req.socket?.remoteAddress || '';
+  const candidates = [
+    one(req.headers['x-vercel-forwarded-for']),
+    one(req.headers['x-forwarded-for']).split(',')[0] ?? '',
+    one(req.headers['x-real-ip']),
+    req.socket?.remoteAddress ?? '',
+  ];
+  for (const raw of candidates) {
+    let ip = raw.trim().replace(/^\[|\]$/g, '').replace(/^::ffff:/i, '');
+    if (/^\d+\.\d+\.\d+\.\d+:\d+$/.test(ip)) ip = ip.split(':')[0];
+    if (isIP(ip)) return ip;
+  }
+  return '';
 }
 
 interface CpxSurvey {
@@ -37,11 +49,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const uid = one(req.query.uid);
   if (!UID_RE.test(uid)) return res.status(400).json({ error: 'bad uid' });
 
+  const ip = clientIp(req);
   const params = new URLSearchParams({
     app_id: appId,
     ext_user_id: uid,
     output_method: 'api',
-    ip_user: clientIp(req),
+    ip_user: ip,
     user_agent: one(req.headers['user-agent']),
     limit: '30',
   });
@@ -51,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const r = await fetch(`${API}?${params}`, { signal: AbortSignal.timeout(10_000) });
     if (!r.ok) return res.status(502).json({ error: `CPX returned ${r.status}` });
-    const data = (await r.json()) as { status?: string; surveys?: CpxSurvey[]; error?: string };
+    const data = (await r.json()) as { status?: string; surveys?: CpxSurvey[]; error?: string; message_not_found?: string };
     if (data.status && data.status !== 'success') {
       return res.status(502).json({ error: `CPX: ${data.status}` });
     }
@@ -75,7 +88,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ surveys });
+    // `why` explains an empty list (it is the visitor's own IP and CPX's own message, nothing secret).
+    return res.status(200).json({ surveys, why: surveys.length === 0 ? { ip, cpx: data.message_not_found ?? '' } : undefined });
   } catch (e) {
     console.error('surveys failed:', e);
     return res.status(502).json({ error: 'Could not reach CPX Research' });

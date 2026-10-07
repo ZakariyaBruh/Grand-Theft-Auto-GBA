@@ -18,7 +18,8 @@ interface Survey {
   href: string;
 }
 
-type Load = { state: 'loading' } | { state: 'off' } | { state: 'error' } | { state: 'ready'; surveys: Survey[] };
+type Why = { ip: string; cpx: string };
+type Load = { state: 'loading' } | { state: 'off' } | { state: 'error' } | { state: 'ready'; surveys: Survey[]; why?: Why };
 type Sort = 'pay' | 'quick';
 
 const statusText: Record<Status, string> = {
@@ -40,8 +41,8 @@ export function OfferWall({ tally }: { tally: Tally }) {
       const r = await fetch(`/api/surveys?uid=${encodeURIComponent(tally.uid)}`);
       if (r.status === 503) return setLoad({ state: 'off' });
       if (!r.ok) return setLoad({ state: 'error' });
-      const d = (await r.json()) as { surveys: Survey[] };
-      setLoad({ state: 'ready', surveys: d.surveys });
+      const d = (await r.json()) as { surveys: Survey[]; why?: Why };
+      setLoad({ state: 'ready', surveys: d.surveys, why: d.why });
     } catch {
       setLoad({ state: 'error' });
     }
@@ -98,6 +99,11 @@ export function OfferWall({ tally }: { tally: Tally }) {
         {load.state === 'ready' && list.length === 0 && (
           <Notice title="No surveys for you right now" action={<button onClick={fetchSurveys} className="btn rounded-full px-4 py-1.5 text-ink">Check again</button>}>
             Surveys are matched to the person and the country, and none fit at the moment. They come and go through the day.
+            {load.why && (
+              <span className="mt-3 block font-mono text-xs">
+                CPX saw {load.why.ip || 'no IP address'}{load.why.cpx ? ` and said: ${load.why.cpx}` : ' and returned an empty list'}.
+              </span>
+            )}
           </Notice>
         )}
 
