@@ -19,6 +19,17 @@ Points are **verified server-side**: the browser generates a random ID, passes i
 
 Each `txid` is credited once, so postback retries don't double-count.
 
+### CPX Research
+
+Main Postback URL (paste into the box, replacing the two values):
+
+```
+https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={trans_id}&status={status}&amount={amount_usd}
+```
+
+- `{user_id}` must be the visitor's ID: when you embed the CPX wall, pass our ID as its user id (`ext_user_id`).
+- `status=1` earns points, `status=2` (cancelled/fraud, which CPX can send weeks later) takes them back, and anything paying 0 (screen-outs) earns nothing.
+
 ## Local
 
 ```
