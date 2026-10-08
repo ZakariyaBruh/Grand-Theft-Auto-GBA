@@ -95,7 +95,15 @@ export function OfferWall({ tally }: { tally: Tally }) {
       <Reveal delay={0.1}>
         <div className="glass mt-6 rounded-3xl p-5" aria-live="polite">
           {surveyState === 'loading' && <p className="py-12 text-center text-muted">Finding surveys for this CPX ID…</p>}
-          {surveyState === 'error' && <p className="py-12 text-center text-muted">Surveys could not be loaded. Try changing the CPX ID or refresh the page.</p>}
+          {surveyState === 'error' && (
+            <div className="flex flex-col items-center gap-4 py-10 text-center">
+              <p className="text-muted">The survey list is temporarily unavailable, but you can still start surveys directly.</p>
+              <a href={url} target="_blank" rel="noreferrer" className="btn inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-black">
+                Start surveys
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          )}
           {surveyState === 'ready' && surveys.length === 0 && <p className="py-12 text-center text-muted">No matching surveys are available for this CPX ID right now.</p>}
           {surveyState === 'ready' && surveys.length > 0 && (
             <div className="grid gap-3 sm:grid-cols-2">
