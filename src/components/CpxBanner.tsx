@@ -11,6 +11,7 @@ declare global {
 
 /**
  * CPX Research "Single Sidebar" widget (design 3): one survey as a wide strip.
+ * A new container element per user id lets React drop the old widget without CPX's own React seeing its DOM wiped.
  * Themed through CPX's style_config as black liquid glass; the glass blur itself is plain CSS in index.css.
  */
 export function CpxBanner({ tally }: { tally: Tally }) {
@@ -27,8 +28,6 @@ export function CpxBanner({ tally }: { tally: Tally }) {
 
       const oldScript = document.getElementById('cpx-lib');
       if (oldScript) oldScript.remove();
-      const div = document.getElementById(DIV_ID);
-      if (div) div.innerHTML = '';
 
       const script3 = { div_id: DIV_ID, theme_style: 3, display_mode: 2 };
       window.config = {
@@ -68,7 +67,7 @@ export function CpxBanner({ tally }: { tally: Tally }) {
   return (
     <section aria-label="Featured survey" className="max-w-5xl mx-auto px-5 pb-12">
       <Reveal>
-        <div id={DIV_ID} className="cpx-glass w-full min-h-[150px]" style={{ height: 150 }} />
+        <div key={tally.uid} id={DIV_ID} className="cpx-glass w-full min-h-[150px]" style={{ height: 150 }} />
       </Reveal>
     </section>
   );

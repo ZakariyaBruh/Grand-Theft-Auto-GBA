@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check, ChevronDown, Copy, RefreshCw, Star } from 'lucide-react';
+import { Check, ChevronDown, CircleHelp, Copy, Dices, RefreshCw, Settings2, Star, X } from 'lucide-react';
 import { POINTS_PER_OFFER } from '../lib/config';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
 import { SplitWords } from './SplitWords';
+import { Qualifier } from './Qualifier';
 import type { Tally, Status } from '../lib/useTally';
 
 interface Survey {
@@ -56,6 +57,8 @@ export function OfferWall({ tally }: { tally: Tally }) {
   const [shown, setShown] = useState(PAGE);
   const [open, setOpen] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showQualifier, setShowQualifier] = useState(false);
+  const [showIdEditor, setShowIdEditor] = useState(false);
 
   const handleCopyId = useCallback(async () => {
     try {
@@ -92,11 +95,24 @@ export function OfferWall({ tally }: { tally: Tally }) {
     <section id="offers" className="max-w-5xl mx-auto px-5 pb-16">
       <Rule />
       <Reveal>
-        <SplitWords inView text="The Sovereign Offer Wall" className="text-3xl font-extrabold tracking-tight" />
-        <p className="mt-2 text-muted max-w-xl">
-          Real surveys, picked for where you are. Tap one to see what it involves before you start.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <SplitWords inView text="The Sovereign Offer Wall" className="text-3xl font-extrabold tracking-tight" />
+            <p className="mt-2 text-muted max-w-xl">
+              Real surveys, picked for where you are. Tap one to see what it involves before you start.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setShowQualifier(v => !v)} aria-expanded={showQualifier} className="btn inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-ink">
+              <CircleHelp className="h-4 w-4" /> Do I qualify?
+            </button>
+            <button onClick={() => setShowIdEditor(true)} className="btn inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-ink">
+              <Settings2 className="h-4 w-4" /> Change CPX ID
+            </button>
+          </div>
+        </div>
       </Reveal>
+      {showQualifier && <Qualifier />}
 
       {load.state === 'ready' && list.length > 0 && (
         <div className="mt-6 flex items-center gap-2 text-sm">
@@ -245,7 +261,53 @@ export function OfferWall({ tally }: { tally: Tally }) {
           </button>
         </div>
       </div>
+      {showIdEditor && <IdDialog tally={tally} onClose={() => setShowIdEditor(false)} />}
     </section>
+  );
+}
+
+function IdDialog({ tally, onClose }: { tally: Tally; onClose: () => void }) {
+  const [next, setNext] = useState(tally.uid);
+  const [error, setError] = useState('');
+
+  function save() {
+    if (!tally.changeUid(next)) {
+      setError('Enter a valid ID, for example 123e4567-e89b-12d3-a456-426614174000.');
+      return;
+    }
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5" role="dialog" aria-modal="true" aria-labelledby="cpx-id-title">
+      <div className="glass w-full max-w-lg rounded-3xl p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="cpx-id-title" className="text-xl font-bold">Change your CPX ID</h2>
+            <p className="mt-1 text-sm text-muted">This ID ties your surveys and points together on this device. A new ID starts with a fresh survey profile and a 0 balance.</p>
+          </div>
+          <button onClick={onClose} aria-label="Close" className="text-muted hover:text-ink"><X /></button>
+        </div>
+        <label htmlFor="cpx-id" className="mt-6 block text-sm font-medium">CPX ID</label>
+        <div className="mt-2 flex gap-2">
+          <input
+            id="cpx-id"
+            value={next}
+            onChange={e => { setNext(e.target.value); setError(''); }}
+            className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white/5 px-3 py-2 font-mono text-sm outline-none focus:border-accent"
+            autoFocus
+          />
+          <button type="button" onClick={() => { setNext(crypto.randomUUID()); setError(''); }} className="btn inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink" title="Generate a new CPX ID">
+            <Dices className="h-4 w-4" /> Randomize
+          </button>
+        </div>
+        {error && <p className="mt-2 text-sm text-red-300" role="alert">{error}</p>}
+        <div className="mt-5 flex justify-end gap-2">
+          <button onClick={onClose} className="btn rounded-full px-4 py-2 text-sm text-ink">Cancel</button>
+          <button onClick={save} className="btn rounded-full bg-accent px-4 py-2 text-sm text-black">Use this ID</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
