@@ -61,6 +61,7 @@ export function Receipt({ tally }: { tally: Tally }) {
       <hr className="my-3 border-dashed border-black/40" />
       <motion.p key={line} aria-live="polite" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="min-h-12">{line}</motion.p>
       <p className="mt-3 text-center text-[11px]">NO REFUNDS. NO RETURNS. NO REGRETS (some regrets).</p>
+      <p className="mt-1 text-center font-mono text-[10px] text-black/50 truncate" title={tally.uid}>ref: {tally.uid}</p>
     </motion.div>
   );
 }

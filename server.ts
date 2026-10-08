@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 // Import Vercel API handlers
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
+import surveysHandler from './api/surveys.js';
+import cpxConfigHandler from './api/cpx-config.js';
 import hyperbeamHandler from './api/hyperbeam.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +39,10 @@ async function startServer() {
       res.status(500).send('Internal Server Error');
     }
   });
+
+  app.get('/api/cpx-config', (req, res) => cpxConfigHandler(req as any, res as any));
+
+  app.get('/api/surveys', (req, res) => surveysHandler(req as any, res as any));
 
   app.get('/api/hyperbeam', async (req, res) => {
     try {

@@ -85,6 +85,36 @@ export async function creditOffer(uid: string, txid: string): Promise<boolean> {
   }
 }
 
+/** Undoes a credited offer (e.g. the network later reverses it as fraud). Returns true if something was reversed. */
+export async function reverseOffer(uid: string, txid: string): Promise<boolean> {
+  try {
+    const c = await db();
+    const tx = await c.transaction('write');
+    try {
+      const del = await tx.execute({ sql: 'DELETE FROM conversions WHERE txid = ? AND uid = ?', args: [txid, uid] });
+      const had = del.rowsAffected === 1;
+      if (had) {
+        await tx.execute({
+          sql: 'UPDATE users SET points = MAX(points - ?, 0), offers = MAX(offers - 1, 0) WHERE uid = ?',
+          args: [POINTS_PER_OFFER, uid],
+        });
+      }
+      await tx.commit();
+      return had;
+    } catch (e) {
+      await tx.rollback();
+      throw e;
+    } finally {
+      try {
+        tx.close();
+      } catch {}
+    }
+  } catch (err) {
+    console.error('Turso reverseOffer error:', err);
+    throw new Error(STORAGE_ERROR);
+  }
+}
+
 /** Takes a rate-limit slot for `seconds`. Returns false if one is already held. */
 export async function claimSlot(key: string, seconds: number): Promise<boolean> {
   try {
