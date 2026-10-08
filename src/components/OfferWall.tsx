@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { RefreshCw, Star } from 'lucide-react';
+import { ChevronDown, RefreshCw, Star } from 'lucide-react';
 import { POINTS_PER_OFFER } from '../lib/config';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
@@ -14,6 +14,8 @@ interface Survey {
   rating: number;
   ratings: number;
   category: string;
+  conversion: number;
+  top: boolean;
   webcam: boolean;
   href: string;
 }
@@ -30,10 +32,29 @@ const statusText: Record<Status, string> = {
 
 const PAGE = 8;
 
+/** CPX labels nearly everything "General", so name surveys by what we can actually tell: how long they take. */
+function surveyName(s: Survey): string {
+  const cat = s.category && s.category.toLowerCase() !== 'general' ? s.category : '';
+  const base =
+    s.minutes <= 1 ? 'One-minute survey' :
+    s.minutes <= 3 ? 'Short survey' :
+    s.minutes <= 6 ? 'Coffee-break survey' :
+    s.minutes <= 12 ? 'Proper survey' : 'The long one';
+  return `${cat ? `${cat}: ` : ''}${base} #${s.id.slice(-4)}`;
+}
+
+function odds(conv: number): string {
+  if (conv >= 70) return 'good odds';
+  if (conv >= 45) return 'fair odds';
+  if (conv > 0) return 'long odds';
+  return 'odds unknown';
+}
+
 export function OfferWall({ tally }: { tally: Tally }) {
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [sort, setSort] = useState<Sort>('pay');
   const [shown, setShown] = useState(PAGE);
+  const [open, setOpen] = useState<string | null>(null);
 
   const fetchSurveys = useCallback(async () => {
     setLoad({ state: 'loading' });
@@ -62,7 +83,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
       <Reveal>
         <SplitWords inView text="The Sovereign Offer Wall" className="text-3xl font-extrabold tracking-tight" />
         <p className="mt-2 text-muted max-w-xl">
-          Real surveys, picked for where you are. Each one opens in its own tab. Finish it, then come back.
+          Real surveys, picked for where you are. Tap one to see what it involves before you start.
         </p>
       </Reveal>
 
@@ -119,32 +140,44 @@ export function OfferWall({ tally }: { tally: Tally }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, delay: Math.min(i, 8) * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <a
-                      href={s.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group grid grid-cols-[4.5rem_1fr_auto] items-center gap-x-5 gap-y-1 py-4 transition-colors hover:bg-white/[0.03] sm:grid-cols-[6rem_1fr_9rem_auto]"
+                    <button
+                      type="button"
+                      aria-expanded={open === s.id}
+                      onClick={() => setOpen(o => (o === s.id ? null : s.id))}
+                      className="group grid w-full cursor-pointer grid-cols-[4.5rem_1fr_auto] items-center gap-x-5 gap-y-1 py-4 text-left transition-colors hover:bg-white/[0.03] sm:grid-cols-[6rem_1fr_9rem_auto]"
                     >
                       <span className="font-mono text-3xl tabular-nums leading-none">
                         {s.minutes}
                         <span className="ml-1 text-xs text-muted">min</span>
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate font-medium">{s.category || 'General survey'}{s.webcam ? ' · webcam' : ''}</span>
+                        <span className="block truncate font-medium">{surveyName(s)}{s.top ? ' · top pick' : ''}</span>
                         <span className="flex items-center gap-1 text-sm text-muted">
                           <Star className="h-3.5 w-3.5 fill-accent text-accent" />
                           {s.rating > 0 ? s.rating.toFixed(1) : 'new'}
                           {s.ratings > 0 && <span>({s.ratings})</span>}
+                          <span className="ml-2">· {odds(s.conversion)}</span>
                         </span>
                       </span>
                       <span className="hidden text-right sm:block">
                         <span className="block font-mono text-accent">${s.zakUsd.toFixed(2)}</span>
                         <span className="block text-xs text-muted">to Zak</span>
                       </span>
-                      <span className="btn rounded-full px-4 py-1.5 text-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent">
-                        Start
-                      </span>
-                    </a>
+                      <ChevronDown className={`h-5 w-5 text-muted transition-transform ${open === s.id ? 'rotate-180 text-accent' : ''}`} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {open === s.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <Details s={s} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.li>
                 ))}
               </AnimatePresence>
@@ -192,5 +225,46 @@ function Skeleton() {
         </li>
       ))}
     </ul>
+  );
+}
+
+function Details({ s }: { s: Survey }) {
+  return (
+    <div className="glass mb-4 rounded-2xl p-5 text-sm">
+      <p className="font-semibold">What to expect</p>
+      <ol className="mt-2 space-y-1.5 text-ink/80">
+        <li><span className="mr-2 font-mono text-accent">1</span>A few questions about you (things like age, location and household). This is how CPX decides whether you fit.</li>
+        <li><span className="mr-2 font-mono text-accent">2</span>If you fit, the survey itself takes about {s.minutes} minute{s.minutes === 1 ? '' : 's'}.</li>
+        <li><span className="mr-2 font-mono text-accent">3</span>If you don’t fit you get screened out. Nobody is paid for that, so just pick another one.</li>
+      </ol>
+
+      <dl className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+        <div>
+          <dt className="text-muted">What you need</dt>
+          <dd>{s.webcam ? 'A working webcam.' : 'No webcam or downloads.'} CPX doesn’t publish this survey’s exact requirements. The opening questions decide.</dd>
+        </div>
+        <div>
+          <dt className="text-muted">Your chances</dt>
+          <dd>
+            {s.conversion > 0
+              ? `CPX reports about ${s.conversion}% of people who start this one get through to a paid completion.`
+              : 'CPX has no completion rate for this one yet.'}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">What people think</dt>
+          <dd>{s.rating > 0 ? `${s.rating.toFixed(1)} out of 5 from ${s.ratings} rating${s.ratings === 1 ? '' : 's'}.` : 'Too new to be rated.'}</dd>
+        </div>
+        <div>
+          <dt className="text-muted">What it’s worth</dt>
+          <dd>About ${s.zakUsd.toFixed(2)} to Zak, and {POINTS_PER_OFFER} Void Points to you once CPX confirms it.</dd>
+        </div>
+      </dl>
+
+      <a href={s.href} target="_blank" rel="noreferrer" className="btn mt-5 inline-block rounded-full bg-accent px-6 py-2.5 font-semibold text-black">
+        Start survey
+      </a>
+      <span className="ml-3 text-muted">Opens in a new tab. Come back here after.</span>
+    </div>
   );
 }

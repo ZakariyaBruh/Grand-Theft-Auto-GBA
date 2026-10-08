@@ -36,6 +36,8 @@ interface CpxSurvey {
   payout_publisher_usd?: number;
   statistics_rating_avg?: number;
   statistics_rating_count?: number;
+  conversion_rate?: string | number;
+  top?: number;
   category?: string;
   webcam?: number;
   href?: string;
@@ -82,6 +84,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         rating: Number(s.statistics_rating_avg ?? 0),
         ratings: Number(s.statistics_rating_count ?? 0),
         category: s.category ?? '',
+        conversion: Math.round(Number(s.conversion_rate ?? 0)),
+        top: s.top === 1,
         webcam: Boolean(s.webcam),
         href,
       }];
