@@ -23,7 +23,7 @@ export default function App() {
         <Perks points={tally.points} uid={tally.uid} />
         <Faq />
       </main>
-      <Footer />
+      <Footer tally={tally} />
     </MotionConfig>
   );
 }

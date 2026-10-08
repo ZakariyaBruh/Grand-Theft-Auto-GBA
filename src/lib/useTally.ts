@@ -17,7 +17,7 @@ function getUid(): string {
 
 export type Status = 'loading' | 'ok' | 'offline';
 
-/** Points are credited server-side by the CPAGrip postback; the browser only reads them. */
+/** Points are credited server-side by the CPX Research postback; the browser only reads them. */
 export function useTally() {
   const [uid, setUid] = useState(getUid);
   const [data, setData] = useState({ points: 0, offers: 0 });

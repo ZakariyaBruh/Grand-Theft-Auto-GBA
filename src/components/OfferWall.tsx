@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
 import { SplitWords } from './SplitWords';
-import { wallUrl, POINTS_PER_OFFER } from '../lib/config';
+import { POINTS_PER_OFFER } from '../lib/config';
 import type { Tally, Status } from '../lib/useTally';
 
 const statusText: Record<Status, string> = {
   loading: 'Checking your balance…',
-  ok: `Each finished survey is worth ${POINTS_PER_OFFER} points once CPAGrip confirms it.`,
+  ok: `Each finished survey is worth ${POINTS_PER_OFFER} points once CPX Research confirms it.`,
   offline: 'Our servers have run out of storage',
 };
 
@@ -17,14 +17,11 @@ type Survey = {
   survey_id?: string | number;
   title?: string;
   loi?: number;
-  payout?: number;
-  cpx_points?: number;
   entry_link?: string;
   link?: string;
 };
 
 export function OfferWall({ tally }: { tally: Tally }) {
-  const url = wallUrl(tally.uid);
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [surveyState, setSurveyState] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -64,8 +61,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
           <div>
             <SplitWords inView text="The Sovereign Offer Wall" className="text-3xl font-extrabold tracking-tight" />
             <p className="mt-2 text-muted max-w-xl">
-              Surveys, quizzes and trials, curated by nobody. Prefer a bigger window?{' '}
-              <a href={url} target="_blank" rel="noreferrer" className="text-ink underline decoration-accent underline-offset-4 hover:text-accent">Open it in its own tab.</a>
+              Real surveys from CPX Research, picked for where you are. Tap one to see what it involves.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -103,7 +99,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
                 const surveyId = survey.id ?? survey.survey_id ?? index;
                 const link = survey.entry_link ?? survey.link;
                 return <article key={String(surveyId)} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{survey.title || `Survey ${index + 1}`}</p><p className="mt-1 text-sm text-muted">{survey.loi ? `${survey.loi} minute${survey.loi === 1 ? '' : 's'}` : 'Short survey'} · Qualification screeners apply</p></div><span className="rounded-full bg-accent/15 px-2.5 py-1 text-sm font-semibold text-accent">{survey.cpx_points ?? survey.payout ?? 0} pts</span></div>
+                  <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{survey.title || `Survey ${index + 1}`}</p><p className="mt-1 text-sm text-muted">{survey.loi ? `${survey.loi} minute${survey.loi === 1 ? '' : 's'}` : 'Short survey'} · Qualification screeners apply</p></div><span className="rounded-full bg-accent/15 px-2.5 py-1 text-sm font-semibold text-accent">{POINTS_PER_OFFER} pts</span></div>
                   {link && <a href={link} target="_blank" rel="noreferrer" className="btn mt-4 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-ink">See qualifications <ExternalLink className="w-3.5 h-3.5" /></a>}
                 </article>;
               })}

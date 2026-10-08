@@ -1,27 +1,43 @@
 # Liquid Void
 
-A black liquid-glass portal around a CPAGrip offer wall. You do an offer, Zak gets paid, you get Void Points (worth what they sound like) and a few small perks.
+A black liquid-glass portal around a CPX Research survey wall. You do a survey, Zak gets paid, you get Void Points (worth what they sound like) and a few small perks.
 
-Points are **verified server-side**: the browser generates a random ID, passes it to the CPAGrip offer script (via `public/wall.html`) as `tracking_id`, and CPAGrip's postback tells `/api/postback` when an offer really completed. The browser can only read its balance, never write it.
+Surveys come from the CPX Research **API** (`api/surveys.ts`) and are rendered by our own UI, so layout, sorting and copy are ours. The visitor's real IP and user agent are passed to CPX so it can match surveys to them.
+
+Points are **verified server-side**: the browser creates a random ID that CPX receives as `ext_user_id`. When a survey completes, CPX calls `/api/postback`, which credits that ID. The browser can only read its balance, never write it.
 
 ## Deploy on Vercel
 
-1. Import the repo into Vercel.
-2. Create a Turso database and set `TURSO_API` to its auth token (`turso db tokens create <db>`). The URL defaults to this project's database; override it with `TURSO_DATABASE_URL`. Tables are created automatically on first use.
-3. Set `POSTBACK_SECRET` to a long random string.
-4. In the CPAGrip dashboard set the postback URL to:
+Set these environment variables, then redeploy:
 
-   ```
-   https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={tracking_id}&txid={...}
-   ```
+| Name | Value |
+| --- | --- |
+| `CPX_APP_ID` | your CPX Research app ID |
+| `CPX_SECURE_HASH` | the app's secure hash from the CPX publisher area (only if that option is on) |
+| `POSTBACK_SECRET` | a long random string (32+ letters/digits) |
+| `TURSO_API` | the Turso database auth token (`turso db tokens create <db>`) |
+| `HYPERBEAM_KEY` | optional, enables the cloud-browser perk |
+| `TURSO_DATABASE_URL` | optional, defaults to this project's database |
 
-   Replace each `{macro}` with the macro CPAGrip shows for your account (user/tracking id, and a unique conversion id for `txid`). If your param names differ, set `POSTBACK_UID_PARAM` / `POSTBACK_TXID_PARAM`.
+Tables are created automatically on first use.
 
-Each `txid` is credited once, so postback retries don't double-count.
+### CPX Research postback
+
+In the CPX publisher area, Postback Settings, paste into **Main Postback URL**:
+
+```
+https://<your-site>/api/postback?secret=<POSTBACK_SECRET>&uid={user_id}&txid={trans_id}&status={status}&amount_usd={amount_usd}&amount_local={amount_local}
+```
+
+- `status=1` earns points once per `trans_id`; `status=2` (cancelled/fraud, sent later) takes them back; a payout of 0 (screen-out) earns nothing.
+- Leave the separate Screen Out Postback field empty.
+- `secure_hash` is computed on the server as md5(`<user id>-<CPX_SECURE_HASH>`), as in the CPX docs.
 
 ## Local
 
 ```
 npm install
-npm run dev     # UI only; /api needs `vercel dev`
+npm run dev
 ```
+
+Locally, set `TURSO_API` in `.env.local` or the points balance shows as unavailable.
