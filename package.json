@@ -29,6 +29,7 @@
     "@types/react-dom": "^19.0.0",
     "@vercel/node": "^21.0.0",
     "tsx": "^4.23.15",
-    "typescript": "~5.8.0"
+    "typescript": "~5.8.0",
+    "vercel": "^63.0.2"
   }
 }

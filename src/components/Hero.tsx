@@ -16,7 +16,7 @@ export function Hero({ tally }: { tally: Tally }) {
       <div>
         <SplitWords as="h1" delay={0.1} text={`I’m Zak.\nI need $${DOLLARS_PER_OFFER.toFixed(2)}.`} className="text-5xl sm:text-7xl font-extrabold tracking-tight leading-[0.95]" />
         <motion.p {...rise(3)} className="mt-6 text-xl text-ink/80 max-w-lg">
-          Complete one survey and CPX Research remits that sum to me. You receive nothing. I’ve reviewed this arrangement at length and I’m pretty comfortable with it.
+          Complete one survey and CPAGrip remits that sum to me. You receive nothing. I’ve reviewed this arrangement at length and I’m pretty comfortable with it.
         </motion.p>
 
         <ol className="mt-10 space-y-3 max-w-md text-lg">
