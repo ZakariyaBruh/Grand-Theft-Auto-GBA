@@ -6,8 +6,7 @@ import { fileURLToPath } from 'url';
 // Import Vercel API handlers
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
-import surveysHandler from './api/surveys.js';
-import cpxConfigHandler from './api/cpx-config.js';
+import hyperbeamHandler from './api/hyperbeam.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,9 +38,14 @@ async function startServer() {
     }
   });
 
-  app.get('/api/cpx-config', (req, res) => cpxConfigHandler(req as any, res as any));
-
-  app.get('/api/surveys', (req, res) => surveysHandler(req as any, res as any));
+  app.get('/api/hyperbeam', async (req, res) => {
+    try {
+      await hyperbeamHandler(req as any, res as any);
+    } catch (error) {
+      console.error('Error in /api/hyperbeam:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
   // Serve static assets / HTML
   if (!isProd) {

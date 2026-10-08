@@ -17,19 +17,31 @@ function getUid(): string {
 
 export type Status = 'loading' | 'ok' | 'offline';
 
-/** Points are credited server-side by the CPX Research postback; the browser only reads them. */
+/** Points are credited server-side by the CPAGrip postback; the browser only reads them. */
 export function useTally() {
   const [uid] = useState(getUid);
   const [data, setData] = useState({ points: 0, offers: 0 });
   const [status, setStatus] = useState<Status>('loading');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const r = await fetch(`/api/points?uid=${uid}`);
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) {
+        let msg = 'Our servers have run out of storage';
+        try {
+          const errData = await r.json();
+          if (errData?.error) msg = errData.error;
+        } catch {}
+        setErrorMessage(msg);
+        setStatus('offline');
+        return;
+      }
       setData(await r.json());
+      setErrorMessage(null);
       setStatus('ok');
     } catch {
+      setErrorMessage('Our servers have run out of storage');
       setStatus('offline');
     }
   }, [uid]);
@@ -40,7 +52,7 @@ export function useTally() {
     return () => window.clearInterval(t);
   }, [refresh]);
 
-  return { uid, ...data, status, refresh };
+  return { uid, ...data, status, errorMessage, refresh };
 }
 
 export type Tally = ReturnType<typeof useTally>;
