@@ -19,7 +19,7 @@ export type Status = 'loading' | 'ok' | 'offline';
 
 /** Points are credited server-side by the CPAGrip postback; the browser only reads them. */
 export function useTally() {
-  const [uid] = useState(getUid);
+  const [uid, setUid] = useState(getUid);
   const [data, setData] = useState({ points: 0, offers: 0 });
   const [status, setStatus] = useState<Status>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -52,7 +52,23 @@ export function useTally() {
     return () => window.clearInterval(t);
   }, [refresh]);
 
-  return { uid, ...data, status, errorMessage, refresh };
+  const changeUid = useCallback((nextUid: string) => {
+    const normalized = nextUid.trim();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalized)) {
+      return false;
+    }
+    try {
+      localStorage.setItem(UID_KEY, normalized);
+    } catch {
+      // The in-memory value still lets the current session continue.
+    }
+    setUid(normalized);
+    setData({ points: 0, offers: 0 });
+    setStatus('loading');
+    return true;
+  }, []);
+
+  return { uid, ...data, status, errorMessage, refresh, changeUid };
 }
 
 export type Tally = ReturnType<typeof useTally>;
