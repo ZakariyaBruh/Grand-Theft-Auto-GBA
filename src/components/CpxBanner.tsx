@@ -23,7 +23,12 @@ export function CpxBanner({ tally }: { tally: Tally }) {
         if (!r.ok) return;
         cfg = await r.json();
       } catch { return; }
-      if (cancelled || document.getElementById('cpx-lib')) return;
+      if (cancelled) return;
+
+      const oldScript = document.getElementById('cpx-lib');
+      if (oldScript) oldScript.remove();
+      const div = document.getElementById(DIV_ID);
+      if (div) div.innerHTML = '';
 
       const script3 = { div_id: DIV_ID, theme_style: 3, display_mode: 2 };
       window.config = {

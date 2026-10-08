@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown, RefreshCw, Star } from 'lucide-react';
+import { Check, ChevronDown, Copy, RefreshCw, Star } from 'lucide-react';
 import { POINTS_PER_OFFER } from '../lib/config';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
@@ -55,6 +55,17 @@ export function OfferWall({ tally }: { tally: Tally }) {
   const [sort, setSort] = useState<Sort>('pay');
   const [shown, setShown] = useState(PAGE);
   const [open, setOpen] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyId = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(tally.uid);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  }, [tally.uid]);
 
   const fetchSurveys = useCallback(async () => {
     setLoad({ state: 'loading' });
@@ -118,7 +129,10 @@ export function OfferWall({ tally }: { tally: Tally }) {
         )}
 
         {load.state === 'ready' && list.length === 0 && (
-          <Notice title="No surveys for you right now" action={<button onClick={fetchSurveys} className="btn rounded-full px-4 py-1.5 text-ink">Check again</button>}>
+          <Notice
+            title="No surveys for you right now"
+            action={<button onClick={fetchSurveys} className="btn rounded-full px-4 py-1.5 text-ink">Check again</button>}
+          >
             Surveys are matched to the person and the country, and none fit at the moment. They come and go through the day.
             {load.why && (
               <span className="mt-3 block font-mono text-xs">
@@ -205,11 +219,31 @@ export function OfferWall({ tally }: { tally: Tally }) {
         )}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
-        <span>{statusText[tally.status]}</span>
-        <button onClick={tally.refresh} className="btn active:scale-95 ml-auto inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-ink">
-          <RefreshCw className="h-3.5 w-3.5" /> Did it count?
-        </button>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted">
+        <div className="flex flex-wrap items-center gap-2">
+          <span>{statusText[tally.status]}</span>
+          <span className="hidden sm:inline text-line">•</span>
+          <span className="font-mono text-xs text-muted flex items-center gap-1.5">
+            CPX ID:
+            <span className="text-ink bg-white/5 px-2 py-0.5 rounded border border-line" title={tally.uid}>
+              {tally.uid.slice(0, 8)}…{tally.uid.slice(-4)}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopyId}
+              title="Copy full CPX ID"
+              className="p-1 hover:text-accent transition-colors"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 text-accent" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 ml-auto">
+          <button onClick={tally.refresh} className="btn active:scale-95 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-ink">
+            <RefreshCw className="h-3.5 w-3.5" /> Did it count?
+          </button>
+        </div>
       </div>
     </section>
   );
