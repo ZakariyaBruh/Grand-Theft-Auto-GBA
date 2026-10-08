@@ -54,7 +54,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
         <Reveal>
           <div className="glass mt-5 rounded-2xl p-5" aria-label="Common survey qualifications">
             <div className="flex items-start justify-between gap-4">
-              <div><p className="font-semibold">What makes you eligible?</p><p className="mt-1 text-sm text-muted">Each survey sets its own screeners. The offer wall will only show surveys that may match your profile.</p></div>
+              <div><p className="font-semibold">Survey-specific qualifications</p><p className="mt-1 text-sm text-muted">Qualifications are set separately by each CPX survey server. Open a survey to see its screeners before you start.</p></div>
               <Check className="text-accent" aria-hidden="true" />
             </div>
             <ul className="mt-4 grid gap-2 text-sm text-muted sm:grid-cols-2">
