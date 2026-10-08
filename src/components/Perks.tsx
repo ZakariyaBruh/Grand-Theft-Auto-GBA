@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Printer, ExternalLink } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
@@ -16,7 +16,6 @@ const PERKS: Perk[] = [
   { id: 'checklist', title: 'A checklist so you stop getting spam', blurb: 'The only perk here that is actually good for you.', cost: 100 },
   { id: 'timer', title: 'A 25-minute timer', blurb: 'Surveys expand to fill the time you give them. This stops that.', cost: 300 },
   { id: 'certificate', title: 'A certificate', blurb: 'For the wall, the fridge, or the drawer of things you are not ready to throw out.', cost: 500 },
-  { id: 'hyperbeam', title: 'Sovereign Multiplayer Cloud Browser', blurb: 'Launch an embedded interactive virtual Chromium browser to watch videos or surf together.', cost: 1000 },
 ];
 
 const CHECKLIST = [
@@ -28,7 +27,7 @@ const CHECKLIST = [
   'Unsubscribe from the first promo email. They get worse.',
 ];
 
-export function Perks({ points, uid }: { points: number; uid: string }) {
+export function Perks({ points }: { points: number }) {
   const next = PERKS.find(p => points < p.cost);
   const maxCost = PERKS[PERKS.length - 1].cost;
 
@@ -37,7 +36,7 @@ export function Perks({ points, uid }: { points: number; uid: string }) {
       <Rule />
       <Reveal><SplitWords inView text="The Void Point Redemption Programme" className="text-3xl font-extrabold tracking-tight" />
       <p className="mt-2 text-muted max-w-xl">
-        Void Points hold no monetary value and cannot be spent anywhere. They do, however, unlock these four things.
+        Void Points hold no monetary value and cannot be spent anywhere. They do, however, unlock these three things.
         {next ? ` ${(next.cost - points).toLocaleString()} more for the next one.` : ' You have all of them. Go outside.'}
       </p></Reveal>
 
@@ -67,15 +66,7 @@ export function Perks({ points, uid }: { points: number; uid: string }) {
                 <AnimatePresence>
                   {open && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-5 max-w-2xl overflow-hidden">
-                      {perk.id === 'checklist' ? (
-                        <Checklist />
-                      ) : perk.id === 'timer' ? (
-                        <Timer />
-                      ) : perk.id === 'certificate' ? (
-                        <Cert />
-                      ) : (
-                        <HyperbeamBrowser uid={uid} />
-                      )}
+                      {perk.id === 'checklist' ? <Checklist /> : perk.id === 'timer' ? <Timer /> : <Cert />}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -167,87 +158,6 @@ function Cert() {
       <button onClick={() => window.print()} className="mt-2 flex items-center gap-1.5 text-sm underline decoration-accent underline-offset-4 cursor-pointer">
         <Printer className="w-3.5 h-3.5" /> Print or save PDF
       </button>
-    </div>
-  );
-}
-function HyperbeamBrowser({ uid }: { uid: string }) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentRegion, setCurrentRegion] = useState<string>('');
-
-  const startSession = async (region: string) => {
-    setLoading(true);
-    setError(null);
-    setCurrentRegion(region);
-    try {
-      const res = await fetch(`/api/hyperbeam?uid=${encodeURIComponent(uid)}&region=${region}`);
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      setUrl(data.embed_url);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Failed to start browser session');
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <div className="mt-4 p-4 border border-white/10 rounded-2xl bg-black/50 backdrop-blur-md">
-      {!url ? (
-        <div className="text-center py-6">
-          <p className="text-sm text-stone-400 mb-4 leading-relaxed max-w-lg mx-auto">
-            Unleash a fully interactive, sandboxed virtual Chromium browser streaming directly into your browser window. Surf, play games, or stream together with no software installed!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button
-              onClick={() => startSession('US')}
-              disabled={loading}
-              className="btn rounded-full px-6 py-2 bg-[#e8ff47] text-black font-semibold hover:bg-white active:scale-95 transition-all cursor-pointer flex items-center gap-2"
-            >
-              🇺🇸 {loading && currentRegion === 'US' ? 'Powering up Offer booster...' : 'Offer booster'}
-            </button>
-            <button
-              onClick={() => startSession('EU')}
-              disabled={loading}
-              className="btn rounded-full px-6 py-2 border border-white/20 text-white font-semibold hover:bg-accent hover:text-black hover:border-accent active:scale-95 transition-all cursor-pointer flex items-center gap-2"
-            >
-              🇪🇺 {loading && currentRegion === 'EU' ? 'Powering up EU...' : 'Launch EU Browser'}
-            </button>
-          </div>
-          {error && (
-            <div className="mt-4 p-3 border border-red-500/20 bg-red-500/5 text-red-400 text-xs rounded-xl max-w-sm mx-auto leading-normal">
-              {error.includes('not configured') ? (
-                <span>
-                  <strong>Configuration Required:</strong> Add your <code>HYPERBEAM_KEY</code> in Vercel to unlock the virtual browser!
-                </span>
-              ) : (
-                error
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="relative">
-          <div className="flex justify-between items-center bg-[#151518] px-4 py-2 border-b border-white/10 rounded-t-xl text-xs">
-            <span className="font-mono text-stone-400">Virtual Machine Active ({currentRegion === 'US' ? 'Offer booster US' : 'EU Region'})</span>
-            <button
-              onClick={() => { setUrl(null); setCurrentRegion(''); }}
-              className="text-stone-400 hover:text-white transition-colors cursor-pointer"
-            >
-              Close (session ends by itself in a few minutes)
-            </button>
-          </div>
-          <iframe
-            src={url}
-            className="w-full h-[500px] bg-black border-x border-b border-white/10 rounded-b-xl"
-            allow="autoplay; camera; microphone; clipboard-read; clipboard-write; fullscreen"
-          />
-        </div>
-      )}
     </div>
   );
 }

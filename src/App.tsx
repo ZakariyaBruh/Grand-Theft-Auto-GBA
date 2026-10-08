@@ -5,6 +5,7 @@ import { Hero } from './components/Hero';
 import { CpxBanner } from './components/CpxBanner';
 import { OfferWall } from './components/OfferWall';
 import { Estimator } from './components/Estimator';
+import { CloudBrowser } from './components/CloudBrowser';
 import { Perks } from './components/Perks';
 import { Faq } from './components/Faq';
 import { Footer } from './components/Footer';
@@ -22,7 +23,8 @@ export default function App() {
         <CpxBanner tally={tally} />
         <OfferWall tally={tally} />
         <Estimator />
-        <Perks points={tally.points} uid={tally.uid} />
+        <CloudBrowser uid={tally.uid} />
+        <Perks points={tally.points} />
         <Faq />
       </main>
       <Footer tally={tally} />

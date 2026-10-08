@@ -16,7 +16,7 @@ Set these environment variables, then redeploy:
 | `CPX_SECURE_HASH` | the app's secure hash from the CPX publisher area (only if that option is on) |
 | `POSTBACK_SECRET` | a long random string (32+ letters/digits) |
 | `TURSO_API` | the Turso database auth token (`turso db tokens create <db>`) |
-| `HYPERBEAM_KEY` | optional, enables the cloud-browser perk |
+| `HYPERBEAM_KEY` | optional, overrides the hardcoded Hyperbeam test key used by the cloud browser (US server) |
 | `TURSO_DATABASE_URL` | optional, defaults to this project's database |
 
 Tables are created automatically on first use.
