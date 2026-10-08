@@ -1,5 +1,5 @@
-import { Check, CircleHelp, Dices, RefreshCw, Settings2, X } from 'lucide-react';
-import { useState } from 'react';
+import { Check, CircleHelp, Dices, ExternalLink, RefreshCw, Settings2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
 import { SplitWords } from './SplitWords';
@@ -12,8 +12,31 @@ const statusText: Record<Status, string> = {
   offline: 'Our servers have run out of storage',
 };
 
+type Survey = {
+  id?: string | number;
+  survey_id?: string | number;
+  title?: string;
+  loi?: number;
+  payout?: number;
+  cpx_points?: number;
+  entry_link?: string;
+  link?: string;
+};
+
 export function OfferWall({ tally }: { tally: Tally }) {
   const url = wallUrl(tally.uid);
+  const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [surveyState, setSurveyState] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setSurveyState('loading');
+    fetch(`/api/surveys?uid=${encodeURIComponent(tally.uid)}`, { signal: controller.signal })
+      .then(response => { if (!response.ok) throw new Error('Survey request failed'); return response.json(); })
+      .then(data => { setSurveys(data); setSurveyState('ready'); })
+      .catch(error => { if (error.name !== 'AbortError') setSurveyState('error'); });
+    return () => controller.abort();
+  }, [tally.uid]);
   const [showQualifications, setShowQualifications] = useState(false);
   const [showIdEditor, setShowIdEditor] = useState(false);
   const [nextId, setNextId] = useState(tally.uid);
@@ -69,7 +92,25 @@ export function OfferWall({ tally }: { tally: Tally }) {
           </div>
         </Reveal>
       )}
-      <Reveal delay={0.1}><iframe src={url} title="Offer wall" className="glass mt-6 w-full h-[640px] rounded-3xl" /></Reveal>
+      <Reveal delay={0.1}>
+        <div className="glass mt-6 rounded-3xl p-5" aria-live="polite">
+          {surveyState === 'loading' && <p className="py-12 text-center text-muted">Finding surveys for this CPX ID…</p>}
+          {surveyState === 'error' && <p className="py-12 text-center text-muted">Surveys could not be loaded. Try changing the CPX ID or refresh the page.</p>}
+          {surveyState === 'ready' && surveys.length === 0 && <p className="py-12 text-center text-muted">No matching surveys are available for this CPX ID right now.</p>}
+          {surveyState === 'ready' && surveys.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {surveys.map((survey, index) => {
+                const surveyId = survey.id ?? survey.survey_id ?? index;
+                const link = survey.entry_link ?? survey.link;
+                return <article key={String(surveyId)} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{survey.title || `Survey ${index + 1}`}</p><p className="mt-1 text-sm text-muted">{survey.loi ? `${survey.loi} minute${survey.loi === 1 ? '' : 's'}` : 'Short survey'} · Qualification screeners apply</p></div><span className="rounded-full bg-accent/15 px-2.5 py-1 text-sm font-semibold text-accent">{survey.cpx_points ?? survey.payout ?? 0} pts</span></div>
+                  {link && <a href={link} target="_blank" rel="noreferrer" className="btn mt-4 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-ink">See qualifications <ExternalLink className="w-3.5 h-3.5" /></a>}
+                </article>;
+              })}
+            </div>
+          )}
+        </div>
+      </Reveal>
       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
         <span>{tally.errorMessage || statusText[tally.status]}</span>
         <button onClick={tally.refresh} className="btn active:scale-95 ml-auto inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-ink"><RefreshCw className="w-3.5 h-3.5" /> Did it count?</button>
