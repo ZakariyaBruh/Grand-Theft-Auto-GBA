@@ -125,6 +125,16 @@ export function OfferWall({ tally }: { tally: Tally }) {
                 CPX saw {load.why.ip || 'no IP address'}{load.why.cpx ? ` and said: ${load.why.cpx}` : ' and returned an empty list'}.
               </span>
             )}
+            {load.why && (
+              <a
+                className="mt-3 inline-block text-sm text-ink underline decoration-accent underline-offset-4 hover:text-accent"
+                href={`mailto:hello@cpx-research.com?subject=${encodeURIComponent('No surveys for one of my test users')}&body=${encodeURIComponent(
+                  `Hi CPX,\n\nMy test user (ext_user_id ${tally.uid}) gets no surveys. The last IP you saw was ${load.why.ip || 'unknown'} and the reply was "${load.why.cpx || 'empty list'}".\n\nThe profile may have been set from a VPN session earlier. Could you check and reset it?\n\nMy app ID: \n`,
+                )}`}
+              >
+                Email CPX support about this ID
+              </a>
+            )}
           </Notice>
         )}
 
