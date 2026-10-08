@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import pointsHandler from './api/points.js';
 import postbackHandler from './api/postback.js';
 import hyperbeamHandler from './api/hyperbeam.js';
+import surveysHandler from './api/surveys.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,15 @@ async function startServer() {
     } catch (error) {
       console.error('Error in /api/hyperbeam:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  app.get('/api/surveys', async (req, res) => {
+    try {
+      await surveysHandler(req as any, res as any);
+    } catch (error) {
+      console.error('Error in /api/surveys:', error);
+      res.status(502).json({ error: 'Survey service unavailable' });
     }
   });
 
