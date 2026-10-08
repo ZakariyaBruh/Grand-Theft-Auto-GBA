@@ -1,4 +1,4 @@
-import { Check, CircleHelp, RefreshCw, Settings2, X } from 'lucide-react';
+import { Check, CircleHelp, Dices, RefreshCw, Settings2, X } from 'lucide-react';
 import { useState } from 'react';
 import { Reveal } from './Reveal';
 import { Rule } from './Rule';
@@ -18,6 +18,11 @@ export function OfferWall({ tally }: { tally: Tally }) {
   const [showIdEditor, setShowIdEditor] = useState(false);
   const [nextId, setNextId] = useState(tally.uid);
   const [idError, setIdError] = useState('');
+
+  function randomizeId() {
+    setNextId(crypto.randomUUID());
+    setIdError('');
+  }
 
   function saveId() {
     if (!tally.changeUid(nextId)) {
@@ -74,7 +79,13 @@ export function OfferWall({ tally }: { tally: Tally }) {
           <div className="glass w-full max-w-lg rounded-3xl p-6">
             <div className="flex items-start justify-between gap-4"><div><h2 id="cpx-id-title" className="text-xl font-bold">Change your CPX ID</h2><p className="mt-1 text-sm text-muted">This ID links surveys and points to the right account on this device.</p></div><button onClick={() => setShowIdEditor(false)} aria-label="Close" className="text-muted hover:text-ink"><X /></button></div>
             <label htmlFor="cpx-id" className="mt-6 block text-sm font-medium">CPX ID</label>
-            <input id="cpx-id" value={nextId} onChange={event => { setNextId(event.target.value); setIdError(''); }} className="mt-2 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2 font-mono text-sm outline-none focus:border-accent" autoFocus />
+            <div className="mt-2 flex gap-2">
+              <input id="cpx-id" value={nextId} onChange={event => { setNextId(event.target.value); setIdError(''); }} className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white/5 px-3 py-2 font-mono text-sm outline-none focus:border-accent" autoFocus />
+              <button type="button" onClick={randomizeId} className="btn inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink" title="Generate a new CPX ID" aria-label="Generate a new CPX ID">
+                <Dices className="w-4 h-4" /> Randomize
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-muted">Generate a fresh ID when starting a new server instance.</p>
             {idError && <p className="mt-2 text-sm text-red-300" role="alert">{idError}</p>}
             <div className="mt-5 flex justify-end gap-2"><button onClick={() => setShowIdEditor(false)} className="btn rounded-full px-4 py-2 text-sm text-ink">Cancel</button><button onClick={saveId} className="btn rounded-full bg-accent px-4 py-2 text-sm text-black">Use this ID</button></div>
           </div>
