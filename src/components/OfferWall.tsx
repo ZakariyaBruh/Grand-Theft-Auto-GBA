@@ -23,7 +23,10 @@ interface Survey {
 
 type Why = { ip: string; cpx: string };
 type Load = { state: 'loading' } | { state: 'off' } | { state: 'error' } | { state: 'ready'; surveys: Survey[]; why?: Why };
-type Sort = 'pay' | 'quick';
+type Sort = 'odds' | 'pay' | 'quick';
+
+/** Below this CPX completion rate a survey is mostly screen-outs, so it is hidden unless you ask. */
+const MIN_ODDS = 45;
 
 const statusText: Record<Status, string> = {
   loading: 'Checking your balance…',
@@ -53,7 +56,8 @@ function odds(conv: number): string {
 
 export function OfferWall({ tally }: { tally: Tally }) {
   const [load, setLoad] = useState<Load>({ state: 'loading' });
-  const [sort, setSort] = useState<Sort>('pay');
+  const [sort, setSort] = useState<Sort>('odds');
+  const [onlyGood, setOnlyGood] = useState(true);
   const [shown, setShown] = useState(PAGE);
   const [open, setOpen] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -85,11 +89,18 @@ export function OfferWall({ tally }: { tally: Tally }) {
 
   useEffect(() => { fetchSurveys(); }, [fetchSurveys]);
 
-  const list = useMemo(() => {
-    if (load.state !== 'ready') return [];
+  const { list, hidden } = useMemo(() => {
+    if (load.state !== 'ready') return { list: [] as Survey[], hidden: 0 };
     const rate = (s: Survey) => s.zakUsd / s.minutes;
-    return [...load.surveys].sort((a, b) => (sort === 'pay' ? rate(b) - rate(a) : a.minutes - b.minutes || rate(b) - rate(a)));
-  }, [load, sort]);
+    const good = load.surveys.filter(s => s.conversion >= MIN_ODDS);
+    // If nothing clears the bar, show everything rather than an empty page.
+    const pool = onlyGood && good.length > 0 ? good : load.surveys;
+    const sorted = [...pool].sort((a, b) =>
+      sort === 'odds' ? b.conversion - a.conversion || b.rating - a.rating || rate(b) - rate(a)
+      : sort === 'pay' ? rate(b) - rate(a)
+      : a.minutes - b.minutes || rate(b) - rate(a));
+    return { list: sorted, hidden: load.surveys.length - pool.length };
+  }, [load, sort, onlyGood]);
 
   return (
     <section id="offers" className="max-w-5xl mx-auto px-5 pb-16">
@@ -117,7 +128,7 @@ export function OfferWall({ tally }: { tally: Tally }) {
       {load.state === 'ready' && list.length > 0 && (
         <div className="mt-6 flex items-center gap-2 text-sm">
           <span className="text-muted mr-1">Sort</span>
-          {([['pay', 'Best for Zak'], ['quick', 'Quickest']] as const).map(([k, label]) => (
+          {([['odds', 'Best odds'], ['pay', 'Best for Zak'], ['quick', 'Quickest']] as const).map(([k, label]) => (
             <button
               key={k}
               onClick={() => { setSort(k); setShown(PAGE); }}
@@ -126,6 +137,10 @@ export function OfferWall({ tally }: { tally: Tally }) {
               {label}
             </button>
           ))}
+          <label className="ml-auto flex cursor-pointer items-center gap-2 text-muted">
+            <input type="checkbox" checked={onlyGood} onChange={e => { setOnlyGood(e.target.checked); setShown(PAGE); }} className="accent-[#e8ff47]" />
+            Hide long odds{hidden > 0 ? ` (${hidden} hidden)` : ''}
+          </label>
         </div>
       )}
 
